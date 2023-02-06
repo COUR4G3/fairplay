@@ -1,0 +1,78 @@
+#!/bin/env python3
+
+import itertools
+import typing as t
+
+from pprint import pformat
+
+try:
+    import dotenv
+except ImportError:
+    dotenv = False
+
+import click
+
+from alembic.command import revision
+from alembic.operations.ops import MigrationScript
+
+from fairplay.app import create_app
+from fairplay.db import migrate
+
+
+def simulate_autogenerate() -> t.List[tuple]:
+    """Simulate the `alembic revision --autogenerate` command
+    and return a list of generated operations.
+    """
+    config = migrate.get_config()
+    revisions: t.List[MigrationScript] = []
+
+    def process_revision_directives(context, revision, directives):
+        nonlocal revisions
+        revisions = list(directives)
+        # Prevent actually generating a migration
+        directives[:] = []
+
+    revision(
+        config=config,
+        autogenerate=True,
+        process_revision_directives=process_revision_directives,
+    )
+    return list(
+        itertools.chain.from_iterable(
+            op.as_diffs()
+            for script in revisions
+            for op in script.upgrade_ops_list
+        )
+    )
+
+
+@click.command()
+@click.pass_context
+def check_migrations(ctx: click.Context):
+    if dotenv:
+        dotenv.load_dotenv()
+    app = create_app()
+
+    with app.app_context():
+        diff = simulate_autogenerate()
+
+    if diff:
+        click.secho(
+            "ERROR: Migrations are out of sync with models. Diff:",
+            fg="red",
+            err=True,
+        )
+        click.secho(pformat(diff, indent=2), fg="red", err=True)
+        click.echo(err=True)
+        command = click.style(
+            "tabit db revision --autogenerate -m 'Your message'",
+            bold=True,
+        )
+        click.echo(f"You may need to run `{command}`.", err=True)
+        ctx.exit(1)
+    else:
+        click.secho("INFO: Migrations in sync.", fg="green", err=True)
+
+
+if __name__ == "__main__":
+    check_migrations()

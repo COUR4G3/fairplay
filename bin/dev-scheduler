@@ -1,0 +1,3 @@
+#!/bin/bash
+
+hupper -w 'fairplay/**/*.py' -m celery -A fairplay.worker beat -l info "$@"

@@ -1,0 +1,60 @@
+{
+    "eslint.packageManager": "yarn",
+    "eslint.validate": ["javascript"],
+    "python.linting.banditArgs": [
+        "-r",
+        "-c",
+        "${workspaceFolder/pyproject.toml"
+    ],
+    "python.linting.mypyArgs": [
+    ],
+    "python.formatting.provider": "black",
+    "python.formatting.blackArgs": [
+        "--line-length=79"
+    ],
+    "reorder-python-imports.args": [
+        "--application-directories=.:owlery",
+    ],
+    "css.validate": false,
+    "less.validate": false,
+    "scss.validate": false,
+    "stylelint.validate": ["css", "scss"],
+    "[css]": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.stylelint": true
+        },
+        "editor.tabSize": 2
+    },
+    "[html]": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.stylelint": false
+        },
+        "editor.tabSize": 2
+    },
+    "[javascript]": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.eslint": false
+        },
+        "editor.tabSize": 2
+    },
+    "[json]": {
+        "editor.autoClosingBrackets": "always"
+    },
+    "[scss]": {
+        "editor.codeActionsOnSave": {
+            "source.fixAll.stylelint": true
+        },
+        "editor.tabSize": 2
+    },
+    "[typescript]": {
+        "editor.tabSize": 2
+    },
+    "[python]": {
+        "editor.formatOnSave": true,
+        "editor.tabSize": 4,
+        "editor.wordBasedSuggestions": false
+    },
+    "esbonio.server.enabled": false,
+    "esbonio.sphinx.confDir": "${workspaceFolder}/docs",
+    "git.ignoreLimitWarning": true
+}

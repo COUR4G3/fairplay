@@ -1,0 +1,6 @@
+#!/bin/bash
+set -e
+
+python -m coverage run --source=fairplay --module pytest -v --tb=short tests "$@"
+python -m coverage html --show-contexts
+python -m coverage report -m --fail-under 100
