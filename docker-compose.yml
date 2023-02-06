@@ -1,0 +1,33 @@
+version: "3.6"
+secrets:
+  secret_key:
+    file: ./secret.key
+services:
+  app:
+    image: fairplay
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    entrypoint: bin/dev-app -h 0.0.0.0
+    environment:
+      FLASK_APP: fairplay.wsgi:app
+      FLASK_DEBUG: 1
+      FAIRPLAY_SECRET_KEY_PATH: /run/secrets/secret_key
+      FAIRPLAY_SETTINGS: /app/settings.py
+      FAIRPLAY_SQLALCHEMY_DATABASE_URI: sqlite:///app.db
+      TZ: Africa/Johannesburg
+    ports:
+      - 0.0.0.0:5000:5000
+    volumes:
+      - ./:/app
+    secrets:
+      - secret_key
+    restart: unless-stopped
+  docs:
+    image: fairplay
+    entrypoint: sphinx-autobuild -a --host 0.0.0.0 docs/ docs/_build/html
+    ports:
+       - 8000:8000
+    volumes:
+      - ./:/app
+    restart: unless-stopped

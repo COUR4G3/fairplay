@@ -17,18 +17,18 @@ def configure_app(
         app.logger.info("Config loaded from settings.py")
 
     try:
-        app.config.from_envvar("ONTHESCENE_SETTINGS")
+        app.config.from_envvar("FAIRPLAY_SETTINGS")
     except (FileNotFoundError, IOError) as e:
-        raise RuntimeWarning(f"ONTHESCENE_SETTINGS could not be loaded: {e}")
+        raise RuntimeWarning(f"FAIRPLAY_SETTINGS could not be loaded: {e}")
     except RuntimeError:
         pass
     else:
         app.logger.info(
-            "Config loaded from ONTHESCENE_SETTINGS=%s",
-            os.environ["ONTHESCENE_SETTINGS"],
+            "Config loaded from FAIRPLAY_SETTINGS=%s",
+            os.environ["FAIRPLAY_SETTINGS"],
         )
 
-    app.config.from_prefixed_env("ONTHESCENE")
+    app.config.from_prefixed_env("FAIRPLAY")
     if not app.secret_key:
         path = app.config.get("SECRET_KEY_PATH")
         if path:

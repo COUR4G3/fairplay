@@ -57,7 +57,7 @@ autodoc_typehints = "description"
 # a list of builtin themes.
 #
 html_title = f"{project} documentation ({release})"
-html_logo = "_static/logo.jpg"
+html_logo = "_static/logo.png"
 html_theme = "furo"
 html_theme_options = {
     "footer_icons": [

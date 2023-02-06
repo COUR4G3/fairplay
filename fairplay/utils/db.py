@@ -8,10 +8,13 @@ class ServerUUID(FunctionElement):
 
 @compiles(ServerUUID)
 def compile_uuid(element, compiler, **kwargs):
-    return """select substr(u,1,8)||'-'||substr(u,9,4)||'-4'||substr(u,13,3)||
-  '-'||v||substr(u,17,3)||'-'||substr(u,21,12) from (
-    select lower(hex(randomblob(16))) as u,
-    substr('89ab',abs(random()) % 4 + 1, 1) as v);"""
+    return (
+        "lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || "
+        "'-4' || substr(lower(hex(randomblob(2))),2) || '-' || "
+        "substr('89ab',abs(random()) % 4 + 1, 1) || "
+        "substr(lower(hex(randomblob(2))),2) || '-' || "
+        "lower(hex(randomblob(6)))"
+    )
 
 
 @compiles(ServerUUID, "postgresql")

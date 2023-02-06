@@ -1,5 +1,5 @@
 import sqlalchemy as sa
-from geoalchemy2 import Geography
+from geoalchemy2 import Geometry
 from sqlalchemy.orm import relationship
 from sqlalchemy_utils import UUIDType
 
@@ -25,12 +25,12 @@ class Hole(BaseModel):
     course = relationship("Course", back_populates="holes")
     tees = relationship("HoleTee", back_populates="hole")
 
-    area = sa.Column(Geography("MULTIPOLYGON"))
-    bunker = sa.Column(Geography("MULTIPOLYGON"))
-    fairway = sa.Column(Geography("MULTIPOLYGON"))
-    green = sa.Column(Geography("POLYGON"))
-    hole = sa.Column(Geography("POINTZ"))
-    water = sa.Column(Geography("MULTIPOLYGON"))
+    area = sa.Column(Geometry("MULTIPOLYGON"))
+    bunker = sa.Column(Geometry("MULTIPOLYGON"))
+    fairway = sa.Column(Geometry("MULTIPOLYGON"))
+    green = sa.Column(Geometry("POLYGON"))
+    hole = sa.Column(Geometry("POINTZ"))
+    water = sa.Column(Geometry("MULTIPOLYGON"))
 
     query_class = HoleQuery
 
@@ -43,7 +43,7 @@ class Hole(BaseModel):
 class HoleTee(BaseModel):
     __tablename__ = "hole_tee"
 
-    point = sa.Column(Geography("POINTZ"))
+    point = sa.Column(Geometry("POINTZ"))
 
     hole_id = sa.Column(
         UUIDType,
