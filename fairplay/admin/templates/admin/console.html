@@ -1,0 +1,16 @@
+{% extends 'admin/base.html' %}
+
+{% block main %}
+<div class="container">
+  <div class="d-flex flex-column justify-content-between">
+    <form action="" method="POST">
+      <textarea id="input" name="input" class="form-control mb-3" style="height:35vh">{{ request.values.input or '' }}</textarea>
+      <div class="d-flex justify-content-end mb-3">
+        <button class="btn btn-primary" type="submit">Submit</button>
+      </div>
+      <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+    </form>
+    <textarea class="form-control" style="height:40vh" readonly>{{ output }}</textarea>
+  </div>
+</div>
+{% endblock %}

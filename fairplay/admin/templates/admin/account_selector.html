@@ -1,0 +1,11 @@
+<li class="nav-item dropdown me-0">
+  <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+    <img class="rounded-circle me-1" src="{{ url_for('static', filename='img/profile.svg', _anchor=current_account.name[0]|lower) }}" height="24" width="24">
+    {{ current_account.name }}
+  </a>
+  <ul class="dropdown-menu dropdown-menu-end">
+    {% for account in iter_accounts() %}
+    <li><button class="dropdown-item {% if account == current_account %}fw-bold{% endif %}" hx-post="{{ url_for('admin.set_account') }}" hx-vals='{"account_id": "{{ account.id }}"}' type="button">{{ account.name }} ({{ (account.id|string)[:8] }})</button></li>
+    {% endfor %}
+  </ul>
+</li>

@@ -1,0 +1,94 @@
+{% macro render_checkbox(field) %}
+<div class="form-check">
+  
+</div>
+{% endmacro %}
+
+{% macro render_description(field) %}
+{% if field.render_kw.description %}
+<div id="{{ field.id }}-description" class="form-text">{{ field.render_kw.description }}</div>
+{% endif %}
+{% endmacro %}
+
+{% macro render_errors(field) %}
+{% for error in field.errors %}
+<div id="{{ field.id }}-error-{{ loop.index }}" class="invalid-feedback">{{ error }}</div>
+{% endfor %}
+{% endmacro %}
+
+{% macro render_field(field, placeholder=None) %}
+{% if field.type == 'BooleanField' %}
+{{ render_checkbox(field) }}
+{% elif field.type == 'TextAreaField' %}
+{{ render_textarea(field, placeholder=placeholder) }}
+{% elif field.type == 'FileField' %}
+{{ render_input(field, type='file', placeholder=placeholder) }}
+{% else %}
+{{ render_input(field, placeholder=placeholder) }}
+{% endif %}
+{% endmacro %}
+
+{% macro render_input(field, type=None, placeholder=None) %}
+{{ render_label(field) }}
+<input
+  id="{{ field.id }}"
+  name="{{ field.name }}"
+  type="{{ type }}"
+  class="form-control {% if field.errors %}is-invalid{% endif %}"
+  aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %}"
+  value="{{ field.data or '' }}"
+  placeholder="{{ placeholder or field.render_kw.placeholder }}"
+>
+{{ render_description(field) }}
+{{ render_errors(field) }}
+{% endmacro %}
+
+{% macro render_label(field) %}
+<label for="{{ field.id }}" class="form-label {% if field.flags.required %}form-label-required{% endif %}">{{ field.label.text }}{% if field.flags.required %} <span class="form-label-required-icon"></span>{% endif %}</label>
+{% endmacro %}
+
+{% macro render_radio(field) %}
+<fieldset>
+  <legend class="form-label {% if field.flags.required %}form-label-required{% endif %} fs-6">{{ field.label.text }}{% if field.flags.required %} <span class="form-label-required-icon"></span>{% endif %}</legend>
+  {% for value, label, selected in field.iter_choices() %}
+  <div class="form-check">
+    <input class="form-check-input {% if field.errors %}is-invalid{% endif %}" type="radio" name="{{ field.name }}" id="{{ field.id }}-{{ loop.index }}" value="{{ value }}" {% if selected %}checked{% endif %} aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %}">
+    <label class="form-check-label" for="{{ field.id }}-{{ loop.index }}">
+      {{ label }}
+    </label>
+  </div>
+  {% endfor %}
+</fieldset>
+{{ render_description(field) }}
+{{ render_errors(field) }}
+{% endmacro %}
+
+{% macro render_select(field) %}
+{{ render_label(field) }}
+<select
+  id="{{ field.id }}"
+  name="{{ field.name }}"
+  class="form-select {% if field.errors %}is-invalid{% endif %}"
+  aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %}"
+>
+  {% for value, label, selected in field.iter_choices() %}
+  <option value="{{ value }}" {% if selected %}selected{% endif %}>{{ label }}</option>
+  {% endfor %}
+</select>
+{{ render_description(field) }}
+{{ render_errors(field) }}
+{% endmacro %}
+
+{% macro render_textarea(field, editor=False, placeholder=None, rows=3) %}
+{{ render_label(field) }}
+<textarea
+  id="{{ field.id }}"
+  name="{{ field.name }}"
+  class="form-control {% if field.errors %}is-invalid{% endif %} {% if editor %}editor{% endif %}"
+  placeholder="{{ placeholder or field.render_kw.placeholder }}"
+  rows="{{ rows }}"
+  aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %}"
+>{{ field.data or '' }}</textarea>
+{{ render_description(field) }}
+{{ render_errors(field) }}
+{% endmacro %}

@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="{{ get_locale() }}">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="mobile-web-app-capable" content="yes">
+
+  <title>{% block title %}fair.play{% endblock %}</title>
+  {% block meta %}
+  <meta name="description" content="Enhance and refine your products, images and marketing with Generative AI.">
+  <meta name="author" content="fair.play">
+  <meta name="keywords" content="ai, artifical intelligence, generative ai, gpt, marketing">
+
+  <link rel="alternate" hreflang="x-default" href="{{ request.base_url }}">
+  <link rel="canonical" href="{{ request.base_url }}">
+
+  {% if config.SENTRY_ENABLED %}{{ sentry_trace_meta }}{% endif %}
+
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{ self.title() }}">
+  <meta property="og:site_name" content="fairplay">
+  <meta property="og:url" content="{{ request.base_url }}">
+  <meta property="og:image" content="{{ url_for('static', filename='img/og-image.png') }}">
+  <meta property="og:description" content="Enhance and refine your products, images and marketing with Generative AI.">
+      
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="{{ self.title() }}">
+  <meta name="twitter:image" content="{{ url_for('static', filename='img/twitter-image.png') }}">
+  <meta name="twitter:site" content="@fairplay">
+  <meta name="twitter:description" content="Enhance and refine your products, images and marketing with Generative AI.">
+  {% endblock %}
+
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.ico') }}" type="image/x-icon">
+  <link rel="icon" href="{{ url_for('static', filename='img/favicon.svg') }}" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="{{ url_for('static', filename='img/apple-touch-icon.png') }}">
+
+  {% block stylesheets %}
+  <link rel="stylesheet" href="{{ url_for('static', filename='dist/css/index.css') }}">
+  <style>
+    body:has(.htmx-request) {
+      overflow-y: hidden;
+    }
+
+    .loader {
+      display: none;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.2);
+      height: 100vh;
+      justify-content: center;
+      left: 0;
+      position: fixed;
+      top: 0;
+      transition: opacity 0.2s linear;
+      width: 100%;
+      z-index: 9999;
+      opacity: 1;
+      transform: opacity 1s linear;
+    }
+
+    .loader.htmx-request {
+      display: flex;
+    }
+  </style>
+  {% endblock %}
+</head>
+
+<body hx-indicator=".htmx-indicator">
+  <div class="htmx-indicator loader">
+    <div class="spinner-border" role="status">
+      <span class="sr-only">Loading...</span>
+    </div>
+  </div>
+
+  <div id="toast-container" class="position-fixed toast-container p-2 top-0 end-0">
+    {% with messages = get_all_messages() %}
+      {% for category, message in messages %}
+        {% include "widgets/toast.html" %}
+      {% endfor %}
+    {% endwith %}
+  </div>
+
+  <div class="modal fade" id="confirm-dialog" tabindex="-1" aria-labelledby="confirm-dialog-title" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="confirm-dialog-title">Warning!</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div id="confirm-dialog-text" class="modal-body">
+          Are you sure?
+        </div>
+        <div class="modal-footer">
+          <button id="confirm-dialog-cancel-btn" type="button" class="btn btn-secondary" data-bs-dismiss="modal">No</button>
+          <button id="confirm-dialog-confirm-btn" type="button" class="btn btn-primary">Yes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  {% block body %}{% endblock %}
+
+  {% block scripts %}
+  {% if config.SENTRY_ENABLED %}
+  <script
+    src="https://browser.sentry-cdn.com/7.53.1/bundle.min.js"
+    integrity="sha384-TAmKuSiw9ilvCDimDNU3n2p9B/TsFLCCBI3zYYxaAwv34hXzH8ghBq/M0SYU/eY9"
+    crossorigin="anonymous"
+    ></script>
+  <script type="text/javascript">
+    Sentry.init({ dsn: "{{ config.SENTRY_DSN }}" });
+  </script>
+  {% endif %}
+  <script type="module" src="{{ url_for('static', filename='dist/js/index.js') }}"></script>
+  <script type="module">
+    window.htmx.on('htmx:configRequest', function(evt) {
+      evt.detail.headers['X-CSRF-Token'] = "{{ csrf_token() }}";
+    });
+  </script>
+  {% endblock %}
+</body>
+</html>

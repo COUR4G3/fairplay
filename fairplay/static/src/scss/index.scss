@@ -1,0 +1,208 @@
+@import "~bootstrap/scss/functions";
+
+@import "variables";
+
+@import "~bootswatch/dist/zephyr/variables";
+
+@import "~bootstrap/scss/variables";
+@import "~bootstrap/scss/variables-dark";
+
+@import "maps";
+
+@import "~bootstrap/scss/maps";
+@import "~bootstrap/scss/mixins";
+@import "~bootstrap/scss/root";
+
+@import "~bootstrap/scss/bootstrap";
+
+@import "~bootstrap/scss/utilities";
+@import "~bootstrap/scss/reboot";
+@import "~bootstrap/scss/type";
+@import "~bootstrap/scss/images";
+@import "~bootstrap/scss/containers";
+@import "~bootstrap/scss/grid";
+@import "~bootstrap/scss/buttons";
+@import "~bootstrap/scss/card";
+@import "~bootstrap/scss/dropdown";
+@import "~bootstrap/scss/forms";
+@import "~bootstrap/scss/nav";
+@import "~bootstrap/scss/navbar";
+@import "~bootstrap/scss/helpers";
+
+@import "~bootswatch/dist/zephyr/bootswatch";
+
+@import "~bootstrap/scss/utilities/api";
+
+@import "code";
+@import "editor";
+@import "forms";
+
+@import "../../../../node_modules/@fortawesome/fontawesome-svg-core/styles.css";
+
+:root {
+  --brand-facebook: #{$brand-facebook};
+  --brand-github: #{$brand-github};
+  --brand-google: #{$brand-google};
+  --brand-instagram: #{$brand-instagram};
+  --brand-linkedin: #{$brand-linkedin};
+  --brand-mastodon: #{$brand-mastodon};
+  --brand-microsoft: #{$brand-microsoft};
+  --brand-odoo: #{$brand-odoo};
+  --brand-opencart: #{$brand-opencart};
+  --brand-shopify: #{$brand-shopify};
+  --brand-stack-exchange: #{$brand-stack-exchange};
+  --brand-stack-overflow: #{$brand-stack-overflow};
+  --brand-twitter: #{$brand-twitter};
+  --brand-whatsapp: #{$brand-whatsapp};
+  --brand-woocommerce: #{$brand-woocommerce};
+  --brand-youtube: #{$brand-youtube};
+}
+
+body {
+  overflow-x: hidden;
+}
+
+.link-facebook {
+  color: var(--brand-facebook);
+
+  &:focus-visible {
+    color: var(--brand-facebook);
+  }
+
+  &:hover {
+    color: shift-color($brand-facebook, $link-shade-percentage);
+  }
+}
+
+.link-github {
+  color: var(--brand-github);
+
+  &:focus-visible {
+    color: var(--brand-github);
+  }
+
+  &:hover {
+    color: shift-color($brand-github, $link-shade-percentage);
+  }
+}
+
+.link-instagram {
+  color: var(--brand-instagram);
+
+  &:focus-visible {
+    color: var(--brand-instagram);
+  }
+
+  &:hover {
+    color: shift-color($brand-instagram, $link-shade-percentage);
+  }
+}
+
+.link-linkedin {
+  color: var(--brand-linkedin);
+
+  &:focus-visible {
+    color: var(--brand-linkedin);
+  }
+
+  &:hover {
+    color: shift-color($brand-linkedin, $link-shade-percentage);
+  }
+}
+
+.link-mastodon {
+  color: var(--brand-mastodon);
+
+  &:focus-visible {
+    color: var(--brand-mastodon);
+  }
+
+  &:hover {
+    color: shift-color($brand-mastodon, $link-shade-percentage);
+  }
+}
+
+.link-twitter {
+  color: var(--brand-twitter);
+
+  &:focus-visible {
+    color: var(--brand-twitter);
+  }
+
+  &:hover {
+    color: shift-color($brand-twitter, $link-shade-percentage);
+  }
+}
+
+.link-youtube {
+  color: var(--brand-youtube);
+
+  &:focus-visible {
+    color: var(--brand-youtube);
+  }
+
+  &:hover {
+    color: shift-color($brand-youtube, $link-shade-percentage);
+  }
+}
+
+.link-google {
+  color: var(--brand-google);
+
+  &:focus-visible {
+    color: var(--brand-google);
+  }
+
+  &:hover {
+    color: shift-color($brand-google, $link-shade-percentage);
+  }
+}
+
+.link-microsoft {
+  color: var(--brand-microsoft);
+
+  &:focus-visible {
+    color: var(--brand-microsoft);
+  }
+
+  &:hover {
+    color: shift-color($brand-microsoft, $link-shade-percentage);
+  }
+}
+
+.link-stack-exchange {
+  color: var(--brand-stack-exchange);
+
+  &:focus-visible {
+    color: var(--brand-stack-exchange);
+  }
+
+  &:hover {
+    color: shift-color($brand-stack-exchange, $link-shade-percentage);
+  }
+}
+
+.link-stack-overflow {
+  color: var(--brand-stack-overflow);
+
+  &:focus-visible {
+    color: var(--brand-stack-overflow);
+  }
+
+  &:hover {
+    color: shift-color($brand-stack-overflow, $link-shade-percentage);
+  }
+}
+
+.filter-item + label {
+  cursor: pointer;
+}
+
+.filter-item:checked + label {
+  font-weight: 600;
+  padding-left: 2.5em;
+  background-image: escape-svg(url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='#{$body-color}' viewBox='0 0 448 512'><!--! Font Awesome Pro 6.4.0 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d='M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z'/></svg>"));
+  background-repeat: no-repeat;
+  background-position: left 1em center;
+  background-size: 1em 1em;
+}

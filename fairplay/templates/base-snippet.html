@@ -1,0 +1,12 @@
+{% block main %}
+{% endblock %}
+
+<title hx-swap-oob="true">{{ self.title() }}</title>
+
+<div id="toast-container" hx-swap-oob="beforeend">
+  {% with messages = get_all_messages() %}
+    {% for category, message in messages %}
+      {% include "widgets/toast.html" %}
+    {% endfor %}
+  {% endwith %}
+</div>

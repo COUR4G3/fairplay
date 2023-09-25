@@ -1,0 +1,19 @@
+{% extends 'base-fullscreen.html' %}
+
+{% block main %}
+<div class="row gx-lg-6 h-100 align-items-center">
+  <div class="col-lg-6 mt-4 mt-lg-0 mb-5 mb-lg-0">
+    {% block side_content %}
+    <h1 class="text-light text-center text-lg-start"><i class="fa-solid fa-golf-ball-tee me-2"></i>fair<span class="fw-bold text-primary">.play</span></h1>
+    {% endblock %}
+  </div>
+
+  <div class="col-lg-6 mb-5 mb-lg-0">
+    <div class="card d-block mx-auto" style="max-width:26rem;">
+      <div class="card-body py-5 px-md-5">
+        {% block form %}{% endblock %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

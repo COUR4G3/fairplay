@@ -1,0 +1,15 @@
+{% macro render_date(value) %}
+{% if value %}
+<time datetime="{{ value.isoformat() }}">{{ value|datetimeformat }}</time>
+{% else %}
+Never
+{% endif %}
+{% endmacro %}
+
+{% macro render_relative_date(value) %}
+{% if value %}
+<time datetime="{{ value.isoformat() }}" data-relative="1">{{ value|datetimeformat }}</time>
+{% else %}
+Never
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block body %}
+<style>
+.c-layout-fullscreen {
+  background-image:linear-gradient(rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 1)),url('{{ url_for("static", filename="img/background.jpg") }}');
+  background-position:center;
+  background-repeat:no-repeat;
+}
+</style>
+
+<div class="d-flex flex-column justify-content-between vh-100 c-layout-fullscreen">
+  <div class="container flex-grow-1 mb-3">
+    {% block main %}{% endblock %}
+  </div>
+  <div class="container">
+    <footer class="d-flex flex-wrap justify-content-center justify-content-xl-between align-items-center py-3 my-4">
+      <div class="col-md-4 mb-3 mb-md-0 flex-grow-1 text-body-secondary text-center text-lg-start">
+        © 2023 <a class="text-decoration-none link-body-emphasis" href="#"><i class="fa-solid fa-golf-ball-tee fa-sm icon-link me-1"></i>fair<span class="text-primary fw-bold">.play</span></a>. All rights reserved.
+      </div>
+
+      <ul class="nav justify-content-center justify-content-md-end">
+        <li class="nav-item">
+          <a class="nav-link" href="#">Docs</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Support</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Privacy Policy</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" href="#">Terms of Service</a>
+        </li>
+        <li class="nav-item dropup">
+          <form action="#" method="POST">
+            {% with locale = get_locale() %}
+            {% set lang = locale|string %}
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-label="Select a language" aria-expanded="false">
+              {{ get_locale()|locale_to_flag }}<span class="visually-hidden">{{ get_locale()|string }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              {% for value, label in iter_locales(flagize=True) %}
+              <li><button class="dropdown-item" type="submit" name="lang" value="{{ value }}">{{ label }}</button></li>
+              {% endfor %}
+            </ul>
+            {% endwith %}
+            <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+          </form>
+        </li>  
+      </ul>
+    </footer>
+  </div>
+</div>
+{% endblock %}

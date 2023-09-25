@@ -1,0 +1,39 @@
+{% extends 'admin/base.html' %}
+
+{% from 'admin/list.html' import render_list %}
+{% from 'admin/widgets/date.html' import render_relative_date %}
+
+{% block title %}
+Users
+{% endblock %}
+
+{% block main %}
+{{ super() }}
+<div class="container">
+  {{ 
+    render_list(
+      users,
+      actions=[
+        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these user accounts? This operation is irreversible.'},
+        {'endpoint': '.disable', 'label': 'Disable', 'method': 'POST', 'confirm': 'Are you sure you want to disable these user accounts? These users will not be able to access their account.'},
+        {'endpoint': '.enable', 'label': 'Enable', 'method': 'POST'},
+      ],
+      columns=[
+        {'name': 'name', 'label': 'Name'},
+        {'name': 'email', 'label': 'Email address'},
+        {'name': 'created_date', 'label': 'Created', 'render': render_relative_date},
+        {'name': 'last_login_date', 'label': 'Last Login', 'render': render_relative_date},
+      ],
+      filters={
+        'role': [
+          {'label': 'All', 'value': ''},
+          {'label': 'Administrators', 'value': 'admin'},
+          {'label': 'Users', 'value': 'user'},
+        ],
+        'active': [{'label': 'Inactive', 'value': 'false'}],
+      },
+      photo='photo_url',
+    ) 
+  }}
+ </div>
+{% endblock %}

@@ -1,0 +1,23 @@
+[default]
+CACHE_TYPE = "SimpleCache"
+CACHE_DEFAULT_TIMEOUT = 3600
+
+EXTENSIONS = []
+
+SESSION_COOKIE_SAMESITE = "Lax"
+
+SQLALCHEMY_TRACK_MODIFICATIONS = false
+
+[development]
+
+[production]
+SESSION_COOKIE_SAMESITE = "Strict"
+SESSION_COOKIE_SECURE = true
+
+[staging]
+
+[testing]
+DATABASE_URL = "@format sqlite://{env[PYTEST_TMPDIR]}/app.db"
+INSTANCE_PATH = "@format sqlite://{env[PYTEST_TMPDIR]}/instance"
+
+WTF_CSRF_ENABLED = false

@@ -1,0 +1,138 @@
+{% macro render_list(
+  records,
+  actions=[],
+  columns=[],
+  create=True,
+  create_endpoint='.create',
+  create_endpoint_kwargs={},
+  create_label='Create',
+  filters={},
+  list_endpoint='.list',
+  list_endpoint_kwargs={},
+  photo=None,
+  read=True,
+  read_endpoint='.read',
+  read_endpoint_kwargs={}
+) %}
+<form id="record-list" action="{{ url_for(list_endpoint, **list_endpoint_kwargs) }}" class="card mb-3" method="GET" hx-trigger="keyup changed delay:500ms from:find input[type='search'], change from:.filter-item">
+  <div class="card-header">
+    <div class="row g-2">
+      <div class="col-auto">
+        {% if create %}
+        <a class="btn btn-primary" href="{{ url_for(create_endpoint, **create_endpoint_kwargs) }}">{{ create_label }}</a>
+        {% endif %}
+        {% for action in actions|selectattr('button', 'true') %}
+        <button class="btn btn-{{ action.button_classname or 'secondary' }}" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **action.endpoint_kwargs or {}) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
+        {% endfor %}
+      </div>
+      <div class="col">
+        <div class="input-group">
+          <input class="form-control ms-auto" style="max-width:384px;" type="search" name="q" value="{{ request.args.q or '' }}" placeholder="Search">
+          <button class="d-none" type="submit" hx-params="q"></button>
+          {% if filters %}
+          <button class="btn btn-link text-reset pe-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-filter fa-fw"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for name, filters in filters|items %}
+            {% if filters|count > 1 and not loop.first %}<li><hr class="dropdown-divider"></li>{% endif %}
+            {% for filter in filters %}
+            <li>
+              <input type="{% if filters|count > 1 %}radio{% else %}checkbox{% endif %}" class="btn-check filter-item" id="filter-{{ name }}-{{ filter.value }}" name="{{ name }}" value="{{ filter.value }}" {% if request.args[name] == filter.value %}checked{% endif %} autocomplete="off">
+              <label class="dropdown-item" for="filter-{{ name }}-{{ filter.value }}">{{ filter.label }}</label>
+            </li>
+            {% endfor %}
+            {% if filters|count > 1 and not loop.last %}<li><hr class="dropdown-divider"></li>{% endif %}
+            {% endfor %}
+          </ul>
+          {% endif %}
+          {% if actions %}
+          <button class="btn btn-link text-reset ps-2 pe-0" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for action in actions|rejectattr('multi', 'false')|rejectattr('button', 'true') %}
+            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **action.endpoint_kwargs or {}) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+  <table class="table table-sm table-striped align-middle mb-0 shadow-none">
+    <thead>
+      <tr>
+        {% if actions %}
+        <th style="width:0" scope="col">
+          <input class="form-check-input table-select-all" type="checkbox" id="select-all" value="*" aria-label="Select all">
+        </th>
+        {% endif %}
+        {% if read %}
+        <th scope="col">#</th>
+        {% endif %}
+        {% if photo %}<th style="width:0" scope="col"><span class="visually-hidden">Photo</span></th>{% endif %}
+        {% for column in columns %}
+        <th scope="col">{{ column.label }}</th>
+        {% endfor %}
+        <th style="width:0" scope="col"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for item in records.items %}
+      <tr {% if item.active is false %}style="filter:grayscale(0.8);"{% endif %}>
+        {% if actions %}
+        <td>
+          <input class="form-check-input table-select" type="checkbox" name="ids[]" value="{{ item.id }}" aria-label="Select {{ item.id }}">
+        </td>
+        {% endif %}
+        {% if read %}
+        <th style="width:0" scope="row"><a href="{{ url_for(read_endpoint, id=item.id, **read_endpoint_kwargs) }}">{{ (item.id|string)[:8] }}</a></th>
+        {% endif %}
+        {% if photo %}
+        <td>
+          <img class="rounded-circle" width="24" height="24" src="{{ item[photo] }}">
+        </td>
+        {% endif %}
+        {% for column in columns %}
+        <td>{% if column.render %}{{ column.render(item[column.name]) }}{% else %}{{ item[column.name] }}{% endif %}</td>
+        {% endfor %}
+        <td>
+          {% if actions %}
+          <button class="btn btn-link icon-link text-reset px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for action in actions|rejectattr('multi', 'true')|rejectattr('button', 'true') %}
+            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, id=item.id, _method=action.method, **action.endpoint_kwargs or {}) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr>
+        <td class="text-center" colspan="99">No results found!</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <div class="card-footer border-top-0">
+    <div class="row align-items-center">
+      <div class="col-auto">
+        Showing <span class="text-body-emphasis">{{ [((records.page - 1) * records.per_page + 1), records.total]|min }}</span> - <span class="text-body-emphasis">{{ [(records.page * records.per_page), records.total]|min }}</span> of <span class="text-body-emphasis">{{ records.total }}</span> records
+      </div>
+      <div class="col">
+        <nav aria-label="List pagination">
+          <ul class="pagination justify-content-end mb-0">
+            <li class="page-item">
+              <a class="page-link {% if not records.has_prev %}disabled{% endif %}" href="{% if records.has_prev %}{{ url_for(list_endpoint, page=records.prev_num, **list_endpoint_kwargs) }}{% else %}#{% endif %}" aria-label="Previous">
+                <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
+              </a>
+            </li>
+            <li class="page-item">
+              <a class="page-link {% if not records.has_next %}disabled{% endif %}" href="{% if records.has_next %}{{ url_for(list_endpoint, page=records.next_num, **list_endpoint_kwargs) }}{% else %}#{% endif %}" aria-label="Next">
+                <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
+              </a>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</form>
+{% endmacro %}

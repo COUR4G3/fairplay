@@ -1,0 +1,34 @@
+@import "../../../../node_modules/quill/dist/quill.bubble.css";
+
+.ql-editor {
+  background-color: $input-bg;
+  border: $input-border-width solid $input-border-color;
+  color: $input-color;
+  font-size: $input-font-size;
+  min-height: 6rem;
+
+  @include border-radius($input-border-radius, 0);
+
+  @include box-shadow($input-box-shadow);
+  @include transition($input-transition);
+}
+
+.ql-editor:focus {
+  box-shadow: $input-btn-focus-box-shadow;
+  background-color: $input-focus-bg;
+  border: $input-border-width solid $input-focus-border-color;
+  color: $input-focus-color;
+  outline: 0;
+
+  @if $enable-shadows {
+    @include box-shadow($input-box-shadow, $input-focus-box-shadow);
+  } @else {
+    // Avoid using mixin so we can pass custom focus shadow properly
+    box-shadow: $input-focus-box-shadow;
+  }
+}
+
+.ql-editor.ql-blank::before {
+  color: $input-placeholder-color;
+  font-style: normal;
+}
