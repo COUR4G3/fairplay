@@ -2,10 +2,15 @@ from flask import Blueprint
 from marshmallow import ValidationError
 from flask_wtf.csrf import CSRFError
 
+from . import api
 from .. import __version__
 
 
 v1 = Blueprint("v1", __name__, url_prefix="/v1")
+
+
+def init_app(app):
+    api.register_blueprint(v1)
 
 
 @v1.errorhandler(400)
@@ -75,7 +80,7 @@ def forbidden(e):
     }, 403
 
 
-@v1.errorhandler(404)
+@v1.app_errorhandler(404)
 def not_found(e):
     return {
         "error": {
@@ -86,7 +91,7 @@ def not_found(e):
     }, 404
 
 
-@v1.errorhandler(405)
+@v1.app_errorhandler(405)
 def method_not_allowed(e):
     return {
         "error": {

@@ -1,4 +1,77 @@
+import base64
+import json
+
 from flask import after_this_request, request, url_for
+
+
+def apply_cursor_pagination(
+    query,
+    expression,
+    cursor_param="cursor",
+    limit_default=20,
+    limit_max=1000,
+    limit_param="limit",
+):
+    cursor = request.args.get(cursor_param)
+
+    if cursor:
+        direction, value, offset = json.loads(base64.b64decode(cursor).decode("utf-8"))
+    else:
+        direction = "next"
+        value = ""
+        offset = 0
+
+    limit = request.args.get(limit_param, limit_default, type=int)
+    limit = min(limit_max, limit)
+
+    if direction == "next":
+        query = query.filter(expression > value)
+    elif direction == "prev":
+        query = query.filter(expression < value)
+
+    query = query.limit(limit).offset(offset)
+
+    count = query.count()
+
+    args = request.args.copy()
+    args.pop("cursor", None)
+
+    cursor = base64.b64encode(json.dumps([direction, value, offset])).decode("utf-8")
+
+    next_value = ""
+    next_offset = 0
+    next_cursor = base64.b64encode(
+        json.dumps(["next", next_value, next_offset])
+    ).decode("utf-8")
+
+    prev_value = ""
+    prev_offset = 0
+    prev_cursor = base64.b64encode(
+        json.dumps(["prev", prev_value, prev_offset])
+    ).decode("utf-8")
+
+    link_header = {
+        "self": url_for(request.endpoint, cursor=cursor, **request.args),
+        "next": url_for(request.endpoint, cursor=next_cursor, **request.args),
+        "prev": url_for(request.endpoint, cursor=prev_cursor, **request.args),
+    }
+
+    link_header = ", ".join(f'<{url}>; rel="{rel}"' for rel, url in link_header.items())
+
+    @after_this_request
+    def add_pagination_headers(response):
+        response.headers.update(
+            {
+                "Link": link_header,
+                "X-Pagination-Count": count,
+                "X-Pagination-Cursor": cursor,
+                "X-Pagination-Limit": limit,
+            }
+        )
+
+        return response
+
+    return query
 
 
 def apply_paged_pagination(
@@ -43,7 +116,7 @@ def apply_paged_pagination(
 
         return response
 
-    return results.query
+    return results
 
 
 def apply_limit_offset_pagination(
@@ -91,6 +164,7 @@ def apply_limit_offset_pagination(
     def add_pagination_headers(response):
         response.headers.update(
             {
+                "Link": link_header,
                 "X-Pagination-Count": count,
                 "X-Pagination-Limit": limit,
                 "X-Pagination-Offset": offset,

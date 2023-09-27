@@ -4,6 +4,26 @@
 </div>
 {% endmacro %}
 
+{% macro render_coordinates(field, height=None) %}
+{{ render_label(field) }}
+<div class="row">
+  <div class="col">
+    <input name="{{ field.lat.id }}-lat" type="number" step="0.001" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.lat.value }}">
+  </div>
+  <div class="col">
+    <input name="{{ field.lon.id }}-lon" type="number" step="0.001" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.lon.value }}">
+  </div>
+  {% if height %}
+  <div class="col">
+    <input name="{{ field.hgt.id }}-hgt" type="number" step="1" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.hgt.value }}">
+  </div>
+  {% endif %}
+</div>
+{{ render_description(field) }}
+{{ render_errors(field) }}
+{% endmacro %}
+
+
 {% macro render_description(field) %}
 {% if field.render_kw.description %}
 <div id="{{ field.id }}-description" class="form-text">{{ field.render_kw.description }}</div>

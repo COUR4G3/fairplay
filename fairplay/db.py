@@ -4,12 +4,16 @@ import sqlalchemy as sa
 import sqlalchemy_utils
 
 from flask_migrate import Migrate
-from flask_sqlalchemy import BaseQuery as _BaseQuery, SQLAlchemy
+from flask_sqlalchemy import SQLAlchemy
+from flask_sqlalchemy.query import Query as BaseQuery
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.functions import FunctionElement
 from sqlalchemy_utils import force_instant_defaults
 
 from .utils.datetime import aware_datetime
+
+
+__all__ = ["BaseModel", "BaseQuery", "db"]
 
 
 db = SQLAlchemy()
@@ -94,8 +98,14 @@ class BaseModel(db.Model):
     )
 
 
-class BaseQuery(_BaseQuery):
-    pass
+Coordinates = sqlalchemy_utils.CompositeType(
+    "coordinates",
+    (
+        sa.Column("lat", sa.Float),
+        sa.Column("lon", sa.Float),
+        sa.Column("hgt", sa.Float, default=0.0),
+    ),
+)
 
 
 Monetary = sqlalchemy_utils.CompositeType(

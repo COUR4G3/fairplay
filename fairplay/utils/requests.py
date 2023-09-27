@@ -6,7 +6,7 @@ from requests.adapters import HTTPAdapter
 
 from .. import __version__
 
-USER_AGENT = f"fairplay/{__version__} requests/{requests.__version__}"
+USER_AGENT = f"fairplay/{__version__}"
 
 
 session = requests.Session()
