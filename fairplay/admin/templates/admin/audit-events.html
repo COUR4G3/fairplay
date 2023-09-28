@@ -2,6 +2,7 @@
 
 {% from 'admin/list.html' import render_list %}
 {% from 'admin/widgets/date.html' import render_date %}
+{% from 'admin/widgets/user.html' import render_user %}
 
 {% block title %}Auditing Events{% endblock %}
 
@@ -19,6 +20,7 @@
         {'name': 'event', 'label': 'Event'},
         {'name': 'message', 'label': 'Message'},
         {'name': 'remote_addr', 'label': 'IP Address'},
+        {'name': 'user', 'label': 'User', 'render': render_user},
       ],
       create=False,
       list_endpoint='.audit_events',

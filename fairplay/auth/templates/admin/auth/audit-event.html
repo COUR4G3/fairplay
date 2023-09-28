@@ -1,5 +1,7 @@
 {% extends 'admin/base.html' %}
 
+{% from 'admin/widgets/user.html' import render_user %}
+
 {% block main %}
 <div class="container">
   <nav aria-label="breadcrumb">
@@ -25,22 +27,22 @@
           <h6>Date</h6>
           <time datetime="{{ event.date.isoformat() }}">{{ event.date|datetimeformat }}</time>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
           <h6>IP Address</h6>
-          <p>{{ event.remote_addr }}</p>
+          <a href="{{ url_for('.audit_events', user_id=user.id, q=event.remote_addr) }}" title="More events from the same IP address">{{ event.remote_addr }}</a>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
           <h6>Request ID</h6>
-          <p>{{ event.request_id }}</p>
+          <a href="{{ url_for('.audit_events', user_id=user.id, q=event.request_id) }}" title="More events from the same request">{{ event.request_id }}</a>
         </div>
-        <div class="col-md-6">
+        <div class="col-md-6 mb-3">
           <h6>User</h6>
-          <p>{{ event.user_id }}</p>
+          <a href="{{ url_for('.audit_events', user_id=user.id, q=event.user_id) }}" title="More events from the same user">{{ render_user(event.user) }}</a>
         </div>
         <div class="w-100"></div>
-        <div class="col-6">
+        <div class="col-6 mb-3">
           <h6>Category</h6>
-          <p>{{ event.category }}</p>
+          <a href="{{ url_for('.audit_events', user_id=user.id, q=event.category) }}" title="More events from the same category">{{ event.category }}</a>
         </div>
         <div class="col-6">
           <h6>Event</h6>

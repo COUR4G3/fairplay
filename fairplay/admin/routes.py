@@ -1,3 +1,5 @@
+import sqlalchemy as sa
+
 from flask import Blueprint, abort, redirect, render_template, request, session, url_for
 
 from ..auth import auth_required
@@ -45,6 +47,17 @@ def audit_events():
     from ..audit import AuditEvent
 
     events = AuditEvent.query.order_by(AuditEvent.date.desc())
+
+    q = request.args.get("q")
+    if q:
+        events = events.filter(
+            AuditEvent.message.ilike(f"%{q}%")
+            | AuditEvent.request_id.cast(sa.String).startswith(q)
+            | AuditEvent.user_id.cast(sa.String).startswith(q)
+            | (AuditEvent.category == q)
+            | (sa.func.host(AuditEvent.remote_addr) == q)
+        )
+
     events = apply_paged_pagination(events)
 
     return render_template("admin/audit-events.html", events=events)
