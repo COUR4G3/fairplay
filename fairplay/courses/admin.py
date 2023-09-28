@@ -38,9 +38,33 @@ def get_courses():
     return Course.query.filter_by_current_user()
 
 
+class CoordiateField(fields.FormField):
+    class PositionForm(FlaskForm):
+        lat = fields.FloatField(
+            "Latitude",
+            validators=(DataRequired(), validators.NumberRange(min=-180.0, max=180.0)),
+        )
+        lon = fields.FloatField(
+            "Longitude",
+            validators=(DataRequired(), validators.NumberRange(min=-180.0, max=180.0)),
+        )
+        hgt = fields.FloatField(
+            "Height",
+            validators=(validators.Optional(), validators.NumberRange(min=0.0)),
+        )
+
+    def __init__(self, label, **kwargs):
+        super().__init__(self.PositionForm, label, **kwargs)
+
+    def populate_obj(self, obj, name):
+        data = {"lat": self.lat.data, "lon": self.lon.data, "hgt": self.hgt.data}
+        setattr(obj, name, data)
+
+
 class CourseForm(FlaskForm):
     name = fields.StringField("Name", validators=(DataRequired(),))
     description = fields.TextAreaField("Description")
+    pos = CoordiateField("Position")
 
 
 @courses.route("", endpoint="create", methods=["POST"])

@@ -8,19 +8,52 @@
 {{ render_label(field) }}
 <div class="row">
   <div class="col">
-    <input name="{{ field.lat.id }}-lat" type="number" step="0.001" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.lat.value }}">
+    <input
+      id="{{ field.lat.id }}"
+      name="{{ field.lat.name }}"
+      type="number"
+      step="0.001"
+      class="form-control {% if field.lat.errors %}is-invalid{% endif %}"
+      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.lat.render_kw.description %}{{ field.lat.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.lat.errors %}{{ field.lat.id }}-error-{{ loop.index }} {% endfor %}"
+      value="{{ field.lat.data or '' }}"
+      placeholder="{{ placeholder or field.lat.render_kw.placeholder }}"
+    >
   </div>
   <div class="col">
-    <input name="{{ field.lon.id }}-lon" type="number" step="0.001" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.lon.value }}">
+    <input
+      id="{{ field.lon.id }}"
+      name="{{ field.lon.name }}"
+      type="number"
+      step="0.001"
+      class="form-control {% if field.lon.errors %}is-invalid{% endif %}"
+      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.lon.render_kw.description %}{{ field.lon.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.lon.errors %}{{ field.lon.id }}-error-{{ loop.index }} {% endfor %}"
+      value="{{ field.lon.data or '' }}"
+      placeholder="{{ placeholder or field.lon.render_kw.placeholder }}"
+    >
   </div>
   {% if height %}
   <div class="col">
-    <input name="{{ field.hgt.id }}-hgt" type="number" step="1" class="form-control {% if field.errors %}is-invalid{% endif %}" value="{{ field.hgt.value }}">
+    <input
+      id="{{ field.hgt.id }}"
+      name="{{ field.hgt.name }}"
+      type="number"
+      step="0.001"
+      class="form-control {% if field.hgt.errors %}is-invalid{% endif %}"
+      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.hgt.render_kw.description %}{{ field.hgt.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.hgt.errors %}{{ field.hgt.id }}-error-{{ loop.index }} {% endfor %}"
+      value="{{ field.lat.data or '' }}"
+      placeholder="{{ placeholder or field.hgt.render_kw.placeholder }}"
+    >
   </div>
   {% endif %}
 </div>
 {{ render_description(field) }}
+{{ render_description(field.lat) }}
+{{ render_description(field.lon) }}
+{{ render_description(field.hgt) }}
 {{ render_errors(field) }}
+{{ render_errors(field.lat) }}
+{{ render_errors(field.lon) }}
+{{ render_errors(field.hgt) }}
 {% endmacro %}
 
 

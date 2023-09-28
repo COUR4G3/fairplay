@@ -32,6 +32,9 @@
         <div class="col-md-12 mb-3 h-100">
           {{ form_widgets.render_textarea(form.description, editor=True) }}
         </div>
+        <div class="col-md-12 mb-3">
+          {{ form_widgets.render_coordinates(form.pos) }}
+        </div>
       </div>
     </div>
     <div class="col-12 col-md-3 col-xxl-2 order-first order-md-last">

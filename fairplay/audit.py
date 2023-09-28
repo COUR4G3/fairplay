@@ -20,6 +20,14 @@ from .utils.datetime import aware_datetime
 logger = logging.getLogger("fairplay.audit")
 
 
+def default_request_id():
+    if not has_request_context():
+        return
+    if not g.get("audit_request_id"):
+        g.audit_request_id = uuid.uuid1()
+    return g.audit_request_id
+
+
 class AuditEventQuery(BaseQuery):
     def filter_by_current_user(self):
         return self.filter_by_user(current_user)
@@ -35,14 +43,6 @@ class AuditEvent(BaseModel):
         ("record", _("Record")),
         ("security", _("Security")),
     ]
-
-    @staticmethod
-    def default_request_id():
-        if not has_request_context():
-            return
-        if not g.get("audit_request_id"):
-            g.audit_request_id = uuid.uuid1()
-        return g.audit_request_id
 
     id = sa.Column(
         sqlalchemy_utils.UUIDType,
@@ -71,7 +71,9 @@ class AuditEvent(BaseModel):
         default=lambda _: has_request_context() and request.remote_addr or None,
     )
 
-    request_id = sa.Column(sqlalchemy_utils.UUIDType, default=default_request_id)
+    request_id = sa.Column(
+        sqlalchemy_utils.UUIDType, default=lambda _: default_request_id()
+    )
 
     user_id = sa.Column(
         sqlalchemy_utils.UUIDType,

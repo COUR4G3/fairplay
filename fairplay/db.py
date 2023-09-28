@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_sqlalchemy.query import Query as BaseQuery
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.sql.functions import FunctionElement
-from sqlalchemy_utils import force_instant_defaults
+from sqlalchemy_utils import force_instant_defaults, register_composites
 
 from .utils.datetime import aware_datetime
 
@@ -26,6 +26,9 @@ def init_db(app):
 
     db.init_app(app)
     migrate.init_app(app, db, directory="fairplay/migrations")
+
+    with app.app_context():
+        register_composites(db.session.connection())
 
 
 class ServerUUID(FunctionElement):
@@ -108,13 +111,13 @@ Coordinates = sqlalchemy_utils.CompositeType(
 )
 
 
-Monetary = sqlalchemy_utils.CompositeType(
-    "monetary",
-    (
-        sa.Column("currency", sqlalchemy_utils.CurrencyType),
-        sa.Column("amount", sa.Numeric(12, 2)),
-    ),
-)
+# Monetary = sqlalchemy_utils.CompositeType(
+#     "monetary",
+#     (
+#         sa.Column("currency", sqlalchemy_utils.CurrencyType),
+#         sa.Column("amount", sa.Numeric(12, 2)),
+#     ),
+# )
 
 
 force_instant_defaults()
