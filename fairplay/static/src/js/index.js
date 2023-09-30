@@ -9,6 +9,7 @@ import * as htmx from 'htmx.org';
 import './confirm';
 import './editor';
 import './icons';
+import './map';
 import './notifications';
 import './table';
 import './time';

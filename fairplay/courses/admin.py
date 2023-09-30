@@ -12,7 +12,7 @@ from ..admin.utils.pagination import apply_paged_pagination
 from ..db import db
 from ..i18n import _
 from ..utils.security import safe_redirect
-from .models import Course
+from .models import Course, CourseHole
 
 
 courses = Blueprint(
@@ -147,3 +147,116 @@ def read(id):
 
 
 update = read
+
+
+holes = Blueprint(
+    "holes", __name__, template_folder="templates", url_prefix="/<course_id>/holes"
+)
+
+courses.register_blueprint(holes)
+
+
+def get_hole(course_id, number):
+    try:
+        return get_holes(course_id)[number]
+    except IndexError:
+        abort(404)
+
+
+def get_holes(course_id):
+    return db.get_or_404(Course, course_id).holes
+
+
+class CourseHoleForm(FlaskForm):
+    number = fields.IntegerField(
+        "Number", validators=(DataRequired(), validators.NumberRange(min=1, max=18))
+    )
+    pos = CoordiateField("Position")
+
+
+@holes.route("", endpoint="create", methods=["POST"])
+@holes.route("/new", endpoint="create", methods=["GET", "POST"])
+def create_hole(course_id):
+    course = get_course(course_id)
+
+    form = CourseHoleForm(
+        data={
+            "number": course.hole_count + 1,
+            "pos": {"lat": course.pos.lat, "lon": course.pos.lon},
+        }
+    )
+
+    if form.validate_on_submit():
+        hole = CourseHole(course=course)
+        form.populate_obj(hole)
+
+        db.session.add(hole)
+        db.session.commit()
+
+        flash(_("Hole created"), "success")
+
+        return redirect(url_for(".read", course_id=course.id, number=hole.number), 303)
+
+    return render_template("admin/courses/hole.html", course=course, form=form)
+
+
+@holes.route("", endpoint="delete", methods=["DELETE"])
+@holes.route("/<int:number>", endpoint="delete", methods=["DELETE"])
+def delete_hole(course_id, number=None):
+    next = request.values.get("next")
+
+    if number:
+        hole = get_hole(course_id, number)
+        course = hole.course
+
+        db.session.delete(hole)
+    else:
+        course = get_course(course_id)
+        ids = request.form.getlist("ids[]")
+
+        holes = get_holes()
+        holes = holes.filter(CourseHole.course == course, CourseHole.id.in_(ids))
+        holes.delete()
+
+    db.session.commit()
+
+    flash(_("Hole(s) deleted"), "warning")
+
+    if next:
+        return safe_redirect(next)
+
+    return redirect(url_for(".list", course_id=course.id), 303)
+
+
+@holes.route("", endpoint="list", methods=["GET"])
+def list_holes(course_id):
+    course = get_course(course_id)
+    holes = CourseHole.query.filter(CourseHole.course == course)
+
+    q = request.args.get("q")
+
+    holes = apply_paged_pagination(holes)
+
+    return render_template("admin/courses/holes.html", course=course, holes=holes)
+
+
+@holes.route("/<int:number>", endpoint="update", methods=["POST"])
+@holes.route("/<int:number>", endpoint="read", methods=["GET"])
+def read_hole(course_id, number):
+    hole = get_hole(course_id, number)
+
+    form = CourseHoleForm(obj=hole)
+
+    if form.validate_on_submit():
+        form.populate_obj(hole)
+
+        db.session.commit()
+
+        flash(_("Hole updated"), "success")
+
+    return render_template(
+        "admin/courses/hole.html", course=hole.course, hole=hole, form=form
+    )
+
+
+update_hole = read_hole

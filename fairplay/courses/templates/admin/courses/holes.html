@@ -1,0 +1,31 @@
+{% extends 'admin/base.html' %}
+
+{% from 'admin/list.html' import render_list %}
+{% from 'admin/widgets/date.html' import render_date %}
+
+{% block breadcrumbs %}
+{{ super() }}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.list') }}">Courses</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.read', id=course.id) }}">{{ course.name }} ({{ (course.id|string)[:8] }})</a></li>
+{% endblock %}
+
+{% block title %}Holes{% endblock %}
+
+{% block main %}
+{{ super() }}
+<div class="container">
+  {{
+    render_list(
+      holes,
+      actions=[
+        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these holes? This operation is irreversible.'},
+      ],
+      columns=[
+        {'name': 'number', 'label': 'Number'},
+      ],
+      endpoint_kwargs={'course_id': course.id},
+      endpoint_id='number',
+    ) 
+  }}
+</div>
+{% endblock %}

@@ -1,4 +1,11 @@
-{% macro render_form(record, actions=[], save=True, save_label='Save') %}
+{% macro render_form(
+  record,
+  actions=[],
+  endpoint_id='id',
+  endpoint_kwargs={},
+  save=True,
+  save_label='Save'
+) %}
 <form action="{{ request.url }}" method="POST" class="card mb-3" id="record-form">
   <div class="card-header">
     <div class="row g-2">
@@ -8,7 +15,7 @@
         {% endif %}
         {% if record %}
         {% for action in actions|selectattr('button', 'true') %}
-        <button class="btn btn-{{ action.button_classname or 'secondary' }}" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, id=record.id, **action.endpoint_kwargs or {}) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
+        <button class="btn btn-{{ action.button_classname or 'secondary' }}" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **dict({endpoint_id: record[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
         {% endfor %}
         {% endif %}
       </div>
@@ -17,7 +24,7 @@
         <button class="btn btn-link text-reset pe-0" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
         <ul class="dropdown-menu dropdown-menu-end">
           {% for action in actions|rejectattr('button', 'true') %}
-          <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, id=record.id, _method=action.method, **(action.endpoint_kwargs or {})) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+          <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **dict({endpoint_id: record[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
           {% endfor %}
         </ul>
       </div>

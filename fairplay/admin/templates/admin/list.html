@@ -6,6 +6,8 @@
   create_endpoint='.create',
   create_endpoint_kwargs={},
   create_label='Create',
+  endpoint_id='id',
+  endpoint_kwargs={},
   filters={},
   list_endpoint='.list',
   list_endpoint_kwargs={},
@@ -14,12 +16,12 @@
   read_endpoint='.read',
   read_endpoint_kwargs={}
 ) %}
-<form id="record-list" action="{{ url_for(list_endpoint, **list_endpoint_kwargs) }}" class="card mb-3" method="GET" hx-trigger="keyup changed delay:500ms from:find input[type='search'], change from:.filter-item">
+<form id="record-list" action="{{ url_for(list_endpoint, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}" class="card mb-3" method="GET" hx-trigger="keyup changed delay:500ms from:find input[type='search'], change from:.filter-item">
   <div class="card-header">
     <div class="row g-2">
       <div class="col-auto">
         {% if create %}
-        <a class="btn btn-primary" href="{{ url_for(create_endpoint, **create_endpoint_kwargs) }}">{{ create_label }}</a>
+        <a class="btn btn-primary" href="{{ url_for(create_endpoint, **dict(endpoint_kwargs, **create_endpoint_kwargs)) }}">{{ create_label }}</a>
         {% endif %}
         {% for action in actions|selectattr('button', 'true') %}
         <button class="btn btn-{{ action.button_classname or 'secondary' }}" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **action.endpoint_kwargs or {}) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
@@ -48,7 +50,7 @@
           <button class="btn btn-link text-reset ps-2 pe-0" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
             {% for action in actions|rejectattr('multi', 'false')|rejectattr('button', 'true') %}
-            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **action.endpoint_kwargs or {}) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **dict(endpoint_kwargs, **action.endpoint_kwargs or {})) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
             {% endfor %}
           </ul>
           {% endif %}
@@ -79,11 +81,11 @@
       <tr {% if item.active is false %}style="filter:grayscale(0.8);"{% endif %}>
         {% if actions %}
         <td>
-          <input class="form-check-input table-select" type="checkbox" name="ids[]" value="{{ item.id }}" aria-label="Select {{ item.id }}">
+          <input class="form-check-input table-select" type="checkbox" name="ids[]" value="{{ item[endpoint_id] }}" aria-label="Select {{ item[endpoint_id] }}">
         </td>
         {% endif %}
         {% if read %}
-        <th style="width:0" scope="row"><a href="{{ url_for(read_endpoint, id=item.id, **read_endpoint_kwargs) }}">{{ (item.id|string)[:8] }}</a></th>
+        <th style="width:0" scope="row"><a href="{{ url_for(read_endpoint, **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **read_endpoint_kwargs))) }}">{{ item[endpoint_id] }}</a></th>
         {% endif %}
         {% if photo %}
         <td>
@@ -98,7 +100,7 @@
           <button class="btn btn-link icon-link text-reset px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
           <ul class="dropdown-menu dropdown-menu-end">
             {% for action in actions|rejectattr('multi', 'true')|rejectattr('button', 'true') %}
-            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, id=item.id, _method=action.method, **action.endpoint_kwargs or {}) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method,  **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
             {% endfor %}
           </ul>
           {% endif %}
@@ -120,12 +122,12 @@
         <nav aria-label="List pagination">
           <ul class="pagination justify-content-end mb-0">
             <li class="page-item">
-              <a class="page-link {% if not records.has_prev %}disabled{% endif %}" href="{% if records.has_prev %}{{ url_for(list_endpoint, page=records.prev_num, **list_endpoint_kwargs) }}{% else %}#{% endif %}" aria-label="Previous">
+              <a class="page-link {% if not records.has_prev %}disabled{% endif %}" href="{% if records.has_prev %}{{ url_for(list_endpoint, page=records.prev_num, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Previous">
                 <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
               </a>
             </li>
             <li class="page-item">
-              <a class="page-link {% if not records.has_next %}disabled{% endif %}" href="{% if records.has_next %}{{ url_for(list_endpoint, page=records.next_num, **list_endpoint_kwargs) }}{% else %}#{% endif %}" aria-label="Next">
+              <a class="page-link {% if not records.has_next %}disabled{% endif %}" href="{% if records.has_next %}{{ url_for(list_endpoint, page=records.next_num, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Next">
                 <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
               </a>
             </li>

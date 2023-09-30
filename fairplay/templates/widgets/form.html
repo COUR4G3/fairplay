@@ -6,14 +6,17 @@
 
 {% macro render_coordinates(field, height=None) %}
 {{ render_label(field) }}
-<div class="row">
+<div class="map row">
+  <div class="col-12 mb-3">
+    <div class="map-container"></div>
+  </div>
   <div class="col">
     <input
       id="{{ field.lat.id }}"
       name="{{ field.lat.name }}"
       type="number"
       step="0.001"
-      class="form-control {% if field.lat.errors %}is-invalid{% endif %}"
+      class="form-control map-latitude {% if field.lat.errors %}is-invalid{% endif %}"
       aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.lat.render_kw.description %}{{ field.lat.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.lat.errors %}{{ field.lat.id }}-error-{{ loop.index }} {% endfor %}"
       value="{{ field.lat.data or '' }}"
       placeholder="{{ placeholder or field.lat.render_kw.placeholder }}"
@@ -25,7 +28,7 @@
       name="{{ field.lon.name }}"
       type="number"
       step="0.001"
-      class="form-control {% if field.lon.errors %}is-invalid{% endif %}"
+      class="form-control map-longitude {% if field.lon.errors %}is-invalid{% endif %}"
       aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.lon.render_kw.description %}{{ field.lon.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.lon.errors %}{{ field.lon.id }}-error-{{ loop.index }} {% endfor %}"
       value="{{ field.lon.data or '' }}"
       placeholder="{{ placeholder or field.lon.render_kw.placeholder }}"
@@ -37,7 +40,7 @@
       id="{{ field.hgt.id }}"
       name="{{ field.hgt.name }}"
       type="number"
-      step="0.001"
+      step="1"
       class="form-control {% if field.hgt.errors %}is-invalid{% endif %}"
       aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.hgt.render_kw.description %}{{ field.hgt.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.hgt.errors %}{{ field.hgt.id }}-error-{{ loop.index }} {% endfor %}"
       value="{{ field.lat.data or '' }}"
