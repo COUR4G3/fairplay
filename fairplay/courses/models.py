@@ -3,7 +3,6 @@ import sqlalchemy.orm as orm
 import sqlalchemy_utils
 
 from flask import session
-from sqlalchemy.orm.collections import attribute_mapped_collection
 from werkzeug.local import LocalProxy
 
 from ..auth import current_user
@@ -50,11 +49,7 @@ class Course(BaseModel):
 
     games = orm.relationship("Game", lazy="dynamic", back_populates="course")
 
-    holes = orm.relationship(
-        "CourseHole",
-        collection_class=attribute_mapped_collection("number"),
-        back_populates="course",
-    )
+    holes = orm.relationship("CourseHole", back_populates="course")
     players = orm.relationship("Player", lazy="dynamic", back_populates="course")
 
     @sqlalchemy_utils.aggregated(

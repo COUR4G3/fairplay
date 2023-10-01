@@ -116,11 +116,12 @@ def audit_events(user_id):
     q = request.args.get("q")
     if q:
         events = events.filter(
-            sa.or_(
-                AuditEvent.category.ilike(f"{q}%"),
-                AuditEvent.event.ilike(f"{q}%"),
-                AuditEvent.message.ilike(f"%{q}%"),
-            )
+            AuditEvent.message.ilike(f"%{q}%")
+            | AuditEvent.request_id.cast(sa.String).istartswith(q)
+            | AuditEvent.user_id.cast(sa.String).istartswith(q)
+            | (AuditEvent.category.ilike(q))
+            | (AuditEvent.event.ilike(q))
+            | (sa.func.host(AuditEvent.remote_addr) == q)
         )
 
     events = apply_paged_pagination(events)

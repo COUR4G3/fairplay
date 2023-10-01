@@ -26,6 +26,7 @@
         {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete this feature? This operation is irreversible.'},
       ],
       endpoint_kwargs={'course_id': course.id, 'number': hole.number},
+      records=features,
     ) 
   %}
   <div class="row flex-row-reverse flex-md-row">

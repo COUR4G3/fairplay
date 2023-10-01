@@ -64,6 +64,11 @@ body {
 
 .map {
   height: 384px;
+
+  border: $input-border-width solid $input-border-color;
+
+  @include border-radius($input-border-radius, 0);
+  @include box-shadow($input-box-shadow);
 }
 
 .link-facebook {

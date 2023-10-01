@@ -160,16 +160,14 @@ holes = Blueprint(
 
 courses.register_blueprint(holes)
 
-
 def get_hole(course_id, number):
-    try:
-        return get_holes(course_id)[number]
-    except IndexError:
-        abort(404)
+    holes = get_holes(course_id)
+    return db.one_or_404(holes.filter(CourseHole.number == number))
 
 
 def get_holes(course_id):
-    return db.get_or_404(Course, course_id).holes
+    course = get_course(course_id)
+    return CourseHole.query.filter(CourseHole.course == course)
 
 
 class CourseHoleForm(FlaskForm):
@@ -268,6 +266,7 @@ def read_hole(course_id, number):
         "admin/courses/hole.html",
         course=hole.course,
         hole=hole,
+        holes=hole.course.holes,
         features=features,
         form=form,
     )
@@ -380,6 +379,7 @@ def list_features(course_id, number):
 def read_feature(course_id, number, id):
     feature = get_feature(course_id, number, id)
     hole = feature.hole
+    features = hole.features
 
     form = CourseFeatureForm(obj=feature)
 
@@ -395,6 +395,7 @@ def read_feature(course_id, number, id):
         course=hole.course,
         hole=hole,
         feature=feature,
+        features=features,
         form=form,
     )
 
