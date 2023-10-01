@@ -2,7 +2,7 @@
 {% if value %}
 <time datetime="{{ value.isoformat() }}">{{ value|datetimeformat }}</time>
 {% else %}
-Never
+<span class="text-muted">Never</span>
 {% endif %}
 {% endmacro %}
 
@@ -10,6 +10,6 @@ Never
 {% if value %}
 <time datetime="{{ value.isoformat() }}" data-relative="1">{{ value|datetimeformat }}</time>
 {% else %}
-Never
+<span class="text-muted ">Never</span>
 {% endif %}
 {% endmacro %}

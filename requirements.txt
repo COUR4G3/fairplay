@@ -12,6 +12,7 @@ Flask-SQLAlchemy~=3.0.5
 Flask-WTF~=1.1.1
 frozendict~=2.3.8
 is-safe-url~=1.0
+geoip2~=4.7.0
 langchain==0.0.268
 lazy-string==1.0.0
 marshmallow~=3.20.1
@@ -27,3 +28,5 @@ redis~=5.0.0
 requests~=2.31.0
 SQLAlchemy-Utils~=0.41.1
 tinycss2~=1.2.1
+werkzeug<3
+wtforms-alchemy~=0.18.0

@@ -2,7 +2,7 @@ from flask import Blueprint, request, url_for
 from marshmallow import ValidationError, fields, validate
 from marshmallow_sqlalchemy import SQLAlchemySchema
 
-from ..api.v1 import v1
+from ..api.v1 import Coordinates, v1
 from ..api.utils.conditional import (
     add_etag_header,
     add_last_modified_header,
@@ -31,6 +31,7 @@ class CourseSchema(SQLAlchemySchema):
 
     id = fields.UUID(dump_only=True)
     name = fields.String(required=True)
+    pos = fields.Nested(Coordinates)
 
 
 def get_courses():
@@ -140,9 +141,11 @@ class CourseHoleSchema(SQLAlchemySchema):
         session = db.session
 
     id = fields.UUID(dump_only=True)
+    name = fields.String()
     number = fields.Integer(required=True, validate=(validate.Range(min=1),))
     index = fields.Integer(validate=(validate.Range(min=0),))
     par = fields.Integer(validate=(validate.Range(min=3, max=5),))
+    pos = fields.Nested(Coordinates)
     course_id = fields.UUID(required=True)
 
 
@@ -176,6 +179,10 @@ def create_hole(course_id=None, number=None):
     if course_id:
         course = get_course(course_id)
         data["course_id"] = course.id
+
+        pos = data.setdefault("pos", {})
+        pos.setdefault("lon", course.pos.lon)
+        pos.setdefault("lat", course.pos.lat)
     else:
         schema.course_id.validators.append(validate_course)
 

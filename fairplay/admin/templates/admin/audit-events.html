@@ -2,6 +2,7 @@
 
 {% from 'admin/list.html' import render_list %}
 {% from 'admin/widgets/date.html' import render_date %}
+{% from 'admin/widgets/remote_addr.html' import render_remote_addr %}
 {% from 'admin/widgets/user.html' import render_user %}
 
 {% block title %}Auditing Events{% endblock %}
@@ -19,7 +20,7 @@
         {'name': 'category', 'label': 'Category'},
         {'name': 'event', 'label': 'Event'},
         {'name': 'message', 'label': 'Message'},
-        {'name': 'remote_addr', 'label': 'IP Address'},
+        {'name': 'remote_addr', 'label': 'IP Address', 'render': render_remote_addr},
         {'name': 'user', 'label': 'User', 'render': render_user},
       ],
       create=False,

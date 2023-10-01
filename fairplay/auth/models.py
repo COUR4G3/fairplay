@@ -7,6 +7,7 @@ from flask_login import AnonymousUserMixin, UserMixin
 from marshmallow import fields
 from marshmallow_sqlalchemy import SQLAlchemySchema
 from sqlalchemy import event
+from sqlalchemy.dialects.postgresql import INET
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from ..audit import audit, audit_record_changes
@@ -81,6 +82,10 @@ class User(BaseModel, UserMixin):
     )
 
     last_login_date = sa.Column(sa.DateTime(True))
+    last_login_location = sa.Column(sa.String)
+    last_login_remote_addr = sa.Column(
+        sqlalchemy_utils.IPAddressType().with_variant(INET, "postgresql"),
+    )
 
     __table_args__ = (
         sa.Index(

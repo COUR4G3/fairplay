@@ -6,7 +6,7 @@
     <ol class="breadcrumb rounded-0">
       <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}"><i class="fa-solid fa-cog"></i></a></li>
       <li class="breadcrumb-item"><a href="{{ url_for('.list') }}">Users</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('.read', id=user.id) }}">{{ user.name }} ({{ (user.id|string)[:8] }})</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('.read', id=user.id) }}">{{ user.name }}</a></li>
       <li class="breadcrumb-item active" aria-current="page">Auditing Events</li>
     </ol>
   </nav>

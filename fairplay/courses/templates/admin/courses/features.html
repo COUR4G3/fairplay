@@ -1,0 +1,33 @@
+{% extends 'admin/base.html' %}
+
+{% from 'admin/list.html' import render_list %}
+{% from 'admin/widgets/date.html' import render_date %}
+
+{% block breadcrumbs %}
+{{ super() }}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.list') }}">Courses</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.read', id=course.id) }}">{{ course.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.holes.list', course_id=course.id) }}">Holes</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.holes.read', course_id=course.id, number=hole.number) }}">{% if hole.name %}{{ hole.name }} (#{{ hole.number }}){% else %}Hole #{{ hole.number }}{% endif %}</a></li>
+{% endblock %}
+
+{% block title %}Features{% endblock %}
+
+{% block main %}
+{{ super() }}
+<div class="container">
+  {{
+    render_list(
+      features,
+      actions=[
+        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these features? This operation is irreversible.'},
+      ],
+      columns=[
+        {'name': 'type', 'label': 'Type'},
+        {'name': 'name', 'label': 'Name'},
+      ],
+      endpoint_kwargs={'course_id': course.id, 'number': hole.number},
+    )
+  }}
+</div>
+{% endblock %}

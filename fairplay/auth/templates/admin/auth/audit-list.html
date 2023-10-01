@@ -1,5 +1,6 @@
 {% from 'admin/list.html' import render_list %}
 {% from 'admin/widgets/date.html' import render_date %}
+{% from 'admin/widgets/remote_addr.html' import render_remote_addr %}
 
 {{
   render_list(
@@ -12,12 +13,11 @@
       {'name': 'category', 'label': 'Category'},
       {'name': 'event', 'label': 'Event'},
       {'name': 'message', 'label': 'Message'},
-      {'name': 'remote_addr', 'label': 'IP Address'},
+      {'name': 'remote_addr', 'label': 'IP Address', 'render': render_remote_addr},
     ],
     create=False,
+    endpoint_kwargs={'user_id': user.id},
     list_endpoint='.audit_events',
-    list_endpoint_kwargs={'user_id': user.id},
     read_endpoint='.audit_event',
-    read_endpoint_kwargs={'user_id': user.id},
   ) 
 }}

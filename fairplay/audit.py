@@ -15,6 +15,7 @@ from .auth import current_user
 from .db import BaseModel, BaseQuery, ServerUUID, db
 from .i18n import _
 from .utils.datetime import aware_datetime
+from .utils.geoip import get_location
 
 
 logger = logging.getLogger("fairplay.audit")
@@ -66,6 +67,12 @@ class AuditEvent(BaseModel):
     record_model = sa.Column(sa.String)
     record_id = sa.Column(sqlalchemy_utils.UUIDType)
 
+    location = sa.Column(
+        sa.String,
+        default=lambda _: has_request_context()
+        and get_location(request.remote_addr)
+        or None,
+    )
     remote_addr = sa.Column(
         sqlalchemy_utils.IPAddressType().with_variant(INET, "postgresql"),
         default=lambda _: has_request_context() and request.remote_addr or None,

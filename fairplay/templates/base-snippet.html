@@ -1,7 +1,7 @@
 {% block main %}
 {% endblock %}
 
-<title hx-swap-oob="true">{{ self.title() }}</title>
+<title hx-swap-oob="true">{{ self.title() }}{% if self.title() %} | {% endif %}fair.play</title>
 
 <div id="toast-container" hx-swap-oob="beforeend">
   {% with messages = get_all_messages() %}

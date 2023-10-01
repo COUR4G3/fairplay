@@ -52,9 +52,10 @@ def audit_events():
     if q:
         events = events.filter(
             AuditEvent.message.ilike(f"%{q}%")
-            | AuditEvent.request_id.cast(sa.String).startswith(q)
-            | AuditEvent.user_id.cast(sa.String).startswith(q)
-            | (AuditEvent.category == q)
+            | AuditEvent.request_id.cast(sa.String).istartswith(q)
+            | AuditEvent.user_id.cast(sa.String).istartswith(q)
+            | (AuditEvent.category.ilike(q))
+            | (AuditEvent.event.ilike(q))
             | (sa.func.host(AuditEvent.remote_addr) == q)
         )
 

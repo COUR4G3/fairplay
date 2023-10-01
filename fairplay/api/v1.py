@@ -1,5 +1,5 @@
 from flask import Blueprint
-from marshmallow import ValidationError
+from marshmallow import Schema, ValidationError, fields
 from flask_wtf.csrf import CSRFError
 
 from . import api
@@ -198,3 +198,9 @@ def info():
         "deprecated": False,
         "version": __version__,
     }
+
+
+class Coordinates(Schema):
+    lat = fields.Float(required=True)
+    lon = fields.Float(required=True)
+    hgt = fields.Float()

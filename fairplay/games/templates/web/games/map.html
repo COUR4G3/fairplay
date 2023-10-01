@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+
+{% block viewport %}<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />{% endblock %}
+
+{% block stylesheets %}
+{{ super() }}
+<style>
+  body {
+    padding: 0;
+    margin: 0;
+  }
+
+  html, body, #map {
+    height: 100%;
+    width: 100vw;
+  }
+</style>
+{% endblock %}
+
+{% block body %}<div id="map"></div>{% endblock %}
+
+{% block scripts %}
+{{ super() }}
+<script>
+	var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		maxZoom: 20,
+		maxNativeZoom: 19,
+		opacity: 0.75,
+		attribution: '© OpenStreetMap contributors'
+	});
+
+	const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.jpg', {
+		maxZoom: 20,
+		maxNativeZoom: 18,
+		attribution: '© Tile: Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
+	});
+
+	const map = L.map('map', {
+		center: [{{ course.pos.lat }}, {{ course.pos.lon }}],
+		compassBearing: true,
+		layers: [sat, osm], 
+		rotate: true,
+		rotateControl: {
+			closeOnZeroBearing: false,
+			// position: 'bottomleft',
+		},
+		touchRotate: true,
+		zoom: 14,
+	});
+
+	{% for number, hole in course.holes|items %}
+	L.marker([{{ hole.pos.lat }}, {{ hole.pos.lon }}]).addTo(map).bindPopup('{{ hole.display_name }}');
+	{% endfor %}
+
+	function onLocationFound(e) {
+		map.setBearing(e.heading);
+
+		const radius = e.accuracy / 2;
+
+		const locationMarker = L.marker(e.latlng).addTo(map)
+			.bindPopup(`You are within ${radius} meters from this point`).openPopup();
+
+		const locationCircle = L.circle(e.latlng, radius).addTo(map);
+	}
+
+	function onLocationError(e) {
+		alert(e.message);
+	}
+
+	map.on('locationfound', onLocationFound);
+	map.on('locationerror', onLocationError);
+
+	map.locate({setView: true, maxZoom: 18});
+</script>
+{% endblock %}

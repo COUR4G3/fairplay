@@ -6,6 +6,7 @@ from .cache import init_cache
 from .config import configure_app
 from .db import init_db
 from .i18n import init_i18n
+from .utils.geoip import init_geoip
 from .utils.htmx import init_htmx
 from .utils.security import init_captcha, init_csrf
 from .utils.web import init_web_utils
@@ -22,6 +23,7 @@ def create_app(**options):
 
     init_captcha(app)
     init_csrf(app)
+    init_geoip(app)
     init_htmx(app)
     init_web_utils(app)
 

@@ -1,10 +1,11 @@
 {% extends 'admin/base.html' %}
 
 {% from 'admin/form.html' import render_form %}
+{% from 'admin/list.html' import render_list %}
 {% import 'widgets/form.html' as form_widgets %}
 
 {% block title %}
-{% if course %}{{ course.name }} ({{ (course.id|string)[:8] }}){% else %}New{% endif %}
+{% if course %}{{ course.name }}{% else %}New{% endif %}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -38,9 +39,31 @@
       </div>
     </div>
     <div class="col-12 col-md-3 col-xxl-2 order-first order-md-last">
-      <img class="img-fluid img-thumbnail rounded-circle" src="{% if course %}{{ course.photo_url }}{% else %}{{ url_for('static', filename='img/profile.svg', _anchor='none') }}{% endif %}">
+      
     </div>
   </div>
   {% endcall %}
+
+  {% if course %}
+  <h2 class="my-3">Holes</h2>
+
+  {{
+    render_list(
+      holes,
+      actions=[
+        {'endpoint': '.holes.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these holes? This operation is irreversible.'},
+      ],
+      columns=[
+        {'name': 'name', 'label': 'Name'},
+      ],
+      create_endpoint=".holes.create",
+      endpoint_kwargs={'course_id': course.id},
+      endpoint_id='number',
+      list_endpoint=".holes.list",
+      read_endpoint=".holes.read",
+      title='number'
+    ) 
+  }}
+  {% endif %}
 </div>
 {% endblock %}

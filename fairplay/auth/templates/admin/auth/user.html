@@ -4,7 +4,7 @@
 {% import 'widgets/form.html' as form_widgets %}
 
 {% block title %}
-{% if user %}{{ user.name }} ({{ (user.id|string)[:8] }}){% else %}New{% endif %}
+{% if user %}{{ user.name }}{% else %}New{% endif %}
 {% endblock %}
 
 {% block breadcrumbs %}
@@ -22,6 +22,7 @@
         {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete this user account? This operation is irreversible.'},
         {'endpoint': '.disable', 'label': 'Disable', 'method': 'POST', 'confirm': 'Are you sure you want to disable this user account? The user will not be able to access their account.'},
         {'endpoint': '.enable', 'label': 'Enable', 'method': 'POST'},
+        {'endpoint': '.enable', 'label': 'Send password reset instructions', 'method': 'POST'},
       ],
     ) 
   %}
@@ -58,7 +59,7 @@
   {% endcall %}
 
   {% if user %}
-  <h2 class="mb-3 ms-2">Auditing Events</h2>
+  <h2 class="my-3">Auditing Events</h2>
 
   {% include 'admin/auth/audit-list.html' %}
   {% endif %}

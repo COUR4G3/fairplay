@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {% block viewport %}<meta name="viewport" content="width=device-width, initial-scale=1">{% endblock %}
   <meta name="mobile-web-app-capable" content="yes">
 
-  <title>{% block title %}fair.play{% endblock %}</title>
+  <title>{% block title %}{% endblock %}{% if self.title() %} | {% endif %}fair.play</title>
   {% block meta %}
   <meta name="description" content="Enhance and refine your products, images and marketing with Generative AI.">
   <meta name="author" content="fair.play">
@@ -112,9 +112,9 @@
     Sentry.init({ dsn: "{{ config.SENTRY_DSN }}" });
   </script>
   {% endif %}
-  <script type="module" src="{{ url_for('static', filename='dist/js/index.js') }}"></script>
-  <script type="module">
-    window.htmx.on('htmx:configRequest', function(evt) {
+  <script src="{{ url_for('static', filename='dist/js/index.js') }}"></script>
+  <script>
+    htmx.on('htmx:configRequest', function(evt) {
       evt.detail.headers['X-CSRF-Token'] = "{{ csrf_token() }}";
     });
   </script>

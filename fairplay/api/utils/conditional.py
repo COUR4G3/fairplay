@@ -37,7 +37,7 @@ def check_if_match(obj, schema, generate_etag_func=None):
 
 def check_if_modified_since(obj, attr="last_updated_date"):
     last_updated = getattr(obj, attr)
-    if last_updated <= request.if_unmodified_since:
+    if request.if_unmodified_since and last_updated <= request.if_unmodified_since:
         abort(make_response("", 304))
 
 
@@ -53,7 +53,7 @@ def check_if_none_match(obj, schema, generate_etag_func=None):
 
 def check_if_unmodified_since(obj, attr="last_updated_date"):
     last_updated = getattr(obj, attr)
-    if last_updated > request.if_unmodified_since:
+    if request.if_unmodified_since and last_updated > request.if_unmodified_since:
         abort(412)
 
 

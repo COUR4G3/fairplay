@@ -8,7 +8,7 @@
     <ol class="breadcrumb rounded-0">
       <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}"><i class="fa-solid fa-cog"></i></a></li>
       <li class="breadcrumb-item"><a href="{{ url_for('.list') }}">Users</a></li>
-      <li class="breadcrumb-item"><a href="{{ url_for('.read', id=user.id) }}">{{ user.name }} ({{ (user.id|string)[:8] }})</a></li>
+      <li class="breadcrumb-item"><a href="{{ url_for('.read', id=user.id) }}">{{ user.name }}</a></li>
       <li class="breadcrumb-item"><a href="{{ url_for('.audit_events', user_id=user.id) }}">Auditing Events</a></li>
       <li class="breadcrumb-item active" aria-current="page">{{ event.category }} Event at <time datetime="{{ event.date.isoformat() }}">{{ event.date|datetimeformat }}</time> ({{ (event.id|string)[:8] }})</li>
     </ol>
@@ -29,7 +29,13 @@
         </div>
         <div class="col-md-6 mb-3">
           <h6>IP Address</h6>
-          <a href="{{ url_for('.audit_events', user_id=user.id, q=event.remote_addr) }}" title="More events from the same IP address">{{ event.remote_addr }}</a>
+          <div class="d-flex align-items-center">
+            <div class="me-2">{{ get_country_code(remote_addr, 'UN')|flag }}</div>
+            <div>
+              <a href="{{ url_for('.audit_events', user_id=user.id, q=event.remote_addr) }}" title="More events from the same IP address">{{ event.remote_addr }}</a>
+              <div class="small">{{ event.location }}</div>
+            </div>
+          </div>
         </div>
         <div class="col-md-6 mb-3">
           <h6>Request ID</h6>
@@ -54,7 +60,7 @@
         </div>
         <div class="col-12">
           <h6>Context</h6>
-          <code>{{ event.context|pprint }}</code>
+          <code><pre>{{ event.context|pprint }}</pre></code>
         </div>
       </div>
     </div>

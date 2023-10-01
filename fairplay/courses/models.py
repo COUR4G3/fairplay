@@ -89,8 +89,11 @@ class CourseHole(BaseModel):
     __tablename__ = "course_hole"
 
     number = sa.Column(sa.Integer, nullable=False)
+    name = sa.Column(sa.String)
     index = sa.Column(sa.Integer)
     par = sa.Column(sa.Integer)
+
+    pos = sa.Column(Coordinates)
 
     course_id = sa.Column(
         sqlalchemy_utils.UUIDType(),
@@ -112,6 +115,13 @@ class CourseHole(BaseModel):
         sa.Index("ix_course_hole_par", par, postgresql_where="par IS NOT NULL"),
         sa.UniqueConstraint(course_id, number, name="uq_course_hole_number"),
     )
+
+    @property
+    def display_name(self):
+        if self.name:
+            return f"{self.name} (Hole #{self.number})"
+        else:
+            return f"Hole #{self.number}"
 
 
 class CourseFeature(BaseModel):
@@ -147,3 +157,7 @@ class CourseFeature(BaseModel):
         sa.Index("ix_course_feature_hole_id", hole_id),
         sa.Index("ix_course_feature_type", type),
     )
+
+    @property
+    def display_name(self):
+        return self.name or self.type.label

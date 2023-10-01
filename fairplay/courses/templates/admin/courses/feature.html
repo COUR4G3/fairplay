@@ -1,0 +1,51 @@
+{% extends 'admin/base.html' %}
+
+{% from 'admin/form.html' import render_form %}
+{% import 'widgets/form.html' as form_widgets %}
+
+{% block title %}
+{% if feature %}{{ feature.display_name }}{% else %}New{% endif %}
+{% endblock %}
+
+{% block breadcrumbs %}
+{{ super() }}
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.list') }}">Courses</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.read', id=course.id) }}">{{ course.name }}</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.holes.list', course_id=course.id) }}">Holes</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('admin.courses.holes.read', course_id=course.id, number=hole.number) }}">{% if hole.name %}{{ hole.name }} (#{{ hole.number }}){% else %}Hole #{{ hole.number }}{% endif %}</a></li>
+<li class="breadcrumb-item"><a href="{{ url_for('.list', course_id=course.id, number=hole.number) }}">Features</a></li>
+{% endblock %}
+
+{% block main %}
+{{ super() }}
+<div class="container">
+  {% call
+    render_form(
+      feature,
+      actions=[
+        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete this feature? This operation is irreversible.'},
+      ],
+      endpoint_kwargs={'course_id': course.id, 'number': hole.number},
+    ) 
+  %}
+  <div class="row flex-row-reverse flex-md-row">
+    <div class="col-12 col-md">
+      <div class="row" style="max-width:768px;">
+        <div class="col-sm-4 mb-3">
+          {{ form_widgets.render_select(form.type) }}
+        </div>
+        <div class="col-sm-8 mb-3">
+          {{ form_widgets.render_field(form.name) }}
+        </div>
+        <div class="col-md-12 mb-3">
+          {{ form_widgets.render_coordinates(form.coords, initial_zoom=17) }}
+        </div>
+      </div>
+    </div>
+    <div class="col-12 col-md-3 col-xxl-2 order-first order-md-last">
+      
+    </div>
+  </div>
+  {% endcall %}
+</div>
+{% endblock %}

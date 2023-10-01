@@ -3,9 +3,7 @@
 {% from 'admin/list.html' import render_list %}
 {% from 'admin/widgets/date.html' import render_relative_date %}
 
-{% block title %}
-Users
-{% endblock %}
+{% block title %}Users{% endblock %}
 
 {% block main %}
 {{ super() }}
@@ -19,7 +17,6 @@ Users
         {'endpoint': '.enable', 'label': 'Enable', 'method': 'POST'},
       ],
       columns=[
-        {'name': 'name', 'label': 'Name'},
         {'name': 'email', 'label': 'Email address'},
         {'name': 'created_date', 'label': 'Created', 'render': render_relative_date},
         {'name': 'last_login_date', 'label': 'Last Login', 'render': render_relative_date},
@@ -33,6 +30,8 @@ Users
         'active': [{'label': 'Inactive', 'value': 'false'}],
       },
       photo='photo_url',
+      title='name',
+      title_label='Name'
     ) 
   }}
  </div>

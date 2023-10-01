@@ -12,6 +12,7 @@ from ..audit import audit
 from ..db import db
 from ..i18n import _, get_locale, get_timezone
 from ..utils.datetime import aware_datetime
+from ..utils.geoip import get_location
 from ..utils.htmx import HTMX_TRUE, htmx_request
 from ..utils.security import is_safe_url, safe_redirect
 
@@ -65,6 +66,9 @@ def login():
             audit("security", "login", "User account logged in", record=user)
 
             user.last_login_date = aware_datetime()
+            user.last_login_location = get_location(request.remote_addr)
+            user.last_login_remote_addr = request.remote_addr
+
             db.session.commit()
 
             return safe_redirect(next)

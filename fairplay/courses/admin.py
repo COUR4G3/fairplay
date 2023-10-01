@@ -12,7 +12,7 @@ from ..admin.utils.pagination import apply_paged_pagination
 from ..db import db
 from ..i18n import _
 from ..utils.security import safe_redirect
-from .models import Course, CourseHole
+from .models import Course, CourseFeature, CourseHole
 
 
 courses = Blueprint(
@@ -143,7 +143,12 @@ def read(id):
 
         flash(_("Course updated"), "success")
 
-    return render_template("admin/courses/course.html", course=course, form=form)
+    holes = CourseHole.query.filter(CourseHole.course == course)
+    holes = apply_paged_pagination(holes)
+
+    return render_template(
+        "admin/courses/course.html", course=course, form=form, holes=holes
+    )
 
 
 update = read
@@ -171,6 +176,7 @@ class CourseHoleForm(FlaskForm):
     number = fields.IntegerField(
         "Number", validators=(DataRequired(), validators.NumberRange(min=1, max=18))
     )
+    name = fields.StringField("Name")
     pos = CoordiateField("Position")
 
 
@@ -214,8 +220,9 @@ def delete_hole(course_id, number=None):
         course = get_course(course_id)
         ids = request.form.getlist("ids[]")
 
-        holes = get_holes()
-        holes = holes.filter(CourseHole.course == course, CourseHole.id.in_(ids))
+        holes = CourseHole.query.filter(
+            CourseHole.course == course, CourseHole.id.in_(ids)
+        )
         holes.delete()
 
     db.session.commit()
@@ -254,9 +261,142 @@ def read_hole(course_id, number):
 
         flash(_("Hole updated"), "success")
 
+    features = CourseFeature.query.filter(CourseFeature.hole == hole)
+    features = apply_paged_pagination(features)
+
     return render_template(
-        "admin/courses/hole.html", course=hole.course, hole=hole, form=form
+        "admin/courses/hole.html",
+        course=hole.course,
+        hole=hole,
+        features=features,
+        form=form,
     )
 
 
 update_hole = read_hole
+
+
+features = Blueprint(
+    "features",
+    __name__,
+    template_folder="templates",
+    url_prefix="<int:number>/features",
+)
+
+holes.register_blueprint(features)
+
+
+def get_feature(course_id, number, id):
+    hole = get_hole(course_id, number)
+    return db.one_or_404(get_features(hole.id).filter(CourseFeature.id == id))
+
+
+def get_features(hole_id):
+    return CourseFeature.query.filter(CourseFeature.hole_id == hole_id)
+
+
+class CourseFeatureForm(FlaskForm):
+    name = fields.StringField("Name")
+    description = fields.TextAreaField("Description")
+    coords = CoordiateField("Position")
+    type = fields.SelectField(
+        "Type", choices=CourseFeature.FEATURE_TYPE_CHOICES, validators=(DataRequired(),)
+    )
+
+
+@features.route("", endpoint="create", methods=["POST"])
+@features.route("/new", endpoint="create", methods=["GET", "POST"])
+def create_feature(course_id, number):
+    hole = get_hole(course_id, number)
+    course = hole.course
+
+    form = CourseFeatureForm(
+        data={"coords": {"lat": hole.pos.lat, "lon": hole.pos.lon}}
+    )
+
+    if form.validate_on_submit():
+        feature = CourseFeature(hole=hole)
+        form.populate_obj(feature)
+
+        db.session.add(feature)
+        db.session.commit()
+
+        flash(_("Feature created"), "success")
+
+        return redirect(
+            url_for(".read", course_id=course_id, number=number, id=feature.id),
+            303,
+        )
+
+    return render_template(
+        "admin/courses/feature.html", course=course, hole=hole, form=form
+    )
+
+
+@features.route("", endpoint="delete", methods=["DELETE"])
+@features.route("/<id>", endpoint="delete", methods=["DELETE"])
+def delete_feature(course_id, number, id=None):
+    next = request.values.get("next")
+
+    if id:
+        feature = get_feature(course_id, number, id)
+
+        db.session.delete(feature)
+    else:
+        hole = get_hole(course_id, number)
+        ids = request.form.getlist("ids[]")
+
+        features = CourseFeature.query.filter(
+            CourseFeature.hole == hole, CourseFeature.id.in_(ids)
+        )
+        features.delete()
+
+    db.session.commit()
+
+    flash(_("Feature(s) deleted"), "warning")
+
+    if next:
+        return safe_redirect(next)
+
+    return redirect(url_for(".list", course_id=course_id, number=number), 303)
+
+
+@features.route("", endpoint="list", methods=["GET"])
+def list_features(course_id, number):
+    hole = get_hole(course_id, number)
+    features = CourseFeature.query.filter(CourseFeature.hole == hole)
+
+    q = request.args.get("q")
+
+    features = apply_paged_pagination(features)
+
+    return render_template(
+        "admin/courses/features.html", course=hole.course, hole=hole, features=features
+    )
+
+
+@features.route("/<id>", endpoint="update", methods=["POST"])
+@features.route("/<id>", endpoint="read", methods=["GET"])
+def read_feature(course_id, number, id):
+    feature = get_feature(course_id, number, id)
+    hole = feature.hole
+
+    form = CourseFeatureForm(obj=feature)
+
+    if form.validate_on_submit():
+        form.populate_obj(feature)
+
+        db.session.commit()
+
+        flash(_("Feature updated"), "success")
+
+    return render_template(
+        "admin/courses/feature.html",
+        course=hole.course,
+        hole=hole,
+        feature=feature,
+        form=form,
+    )
+
+
+update_feature = read_feature

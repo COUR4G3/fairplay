@@ -1,3 +1,5 @@
+{% macro render_title(record) %}{{ record['id'] }}{% endmacro %}
+
 {% macro render_list(
   records,
   actions=[],
@@ -14,7 +16,9 @@
   photo=None,
   read=True,
   read_endpoint='.read',
-  read_endpoint_kwargs={}
+  read_endpoint_kwargs={},
+  title=render_title,
+  title_label='#'
 ) %}
 <form id="record-list" action="{{ url_for(list_endpoint, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}" class="card mb-3" method="GET" hx-trigger="keyup changed delay:500ms from:find input[type='search'], change from:.filter-item">
   <div class="card-header">
@@ -66,10 +70,10 @@
           <input class="form-check-input table-select-all" type="checkbox" id="select-all" value="*" aria-label="Select all">
         </th>
         {% endif %}
-        {% if read %}
-        <th scope="col">#</th>
-        {% endif %}
         {% if photo %}<th style="width:0" scope="col"><span class="visually-hidden">Photo</span></th>{% endif %}
+        {% if read %}
+        <th scope="col">{{ title_label }}</th>
+        {% endif %}
         {% for column in columns %}
         <th scope="col">{{ column.label }}</th>
         {% endfor %}
@@ -81,16 +85,16 @@
       <tr {% if item.active is false %}style="filter:grayscale(0.8);"{% endif %}>
         {% if actions %}
         <td>
-          <input class="form-check-input table-select" type="checkbox" name="ids[]" value="{{ item[endpoint_id] }}" aria-label="Select {{ item[endpoint_id] }}">
+          <input class="form-check-input table-select" type="checkbox" name="ids[]" value="{{ item.id }}" aria-label="Select {{ item[endpoint_id] }}">
         </td>
-        {% endif %}
-        {% if read %}
-        <th style="width:0" scope="row"><a href="{{ url_for(read_endpoint, **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **read_endpoint_kwargs))) }}">{{ item[endpoint_id] }}</a></th>
         {% endif %}
         {% if photo %}
         <td>
           <img class="rounded-circle" width="24" height="24" src="{{ item[photo] }}">
         </td>
+        {% endif %}
+        {% if read %}
+        <th scope="row"><a href="{{ url_for(read_endpoint, **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **read_endpoint_kwargs))) }}">{% if title is callable %}{{ title(item) }}{% else %}{{ item[title] }}{% endif %}</a></th>
         {% endif %}
         {% for column in columns %}
         <td>{% if column.render %}{{ column.render(item[column.name]) }}{% else %}{{ item[column.name] }}{% endif %}</td>

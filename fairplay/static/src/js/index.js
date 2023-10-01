@@ -3,6 +3,7 @@ import Modal from 'bootstrap/js/dist/modal';
 import Offcanvas from 'bootstrap/js/dist/offcanvas';
 import Toast from 'bootstrap/js/dist/toast';
 import Tooltip from 'bootstrap/js/dist/tooltip';
+import L from 'leaflet';
 
 import * as htmx from 'htmx.org';
 
@@ -31,8 +32,10 @@ const bootstrap = { Dropdown, Modal, Offcanvas, Toast, Tooltip }
 
 window.bootstrap = bootstrap;
 window.htmx = htmx;
+window.L = L;
 
 export {
   bootstrap,
   htmx,
+  L,
 }
