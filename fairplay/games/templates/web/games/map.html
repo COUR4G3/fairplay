@@ -48,7 +48,7 @@
 		zoom: 14,
 	});
 
-	{% for number, hole in course.holes|items %}
+	{% for hole in course.holes %}
 	L.marker([{{ hole.pos.lat }}, {{ hole.pos.lon }}]).addTo(map).bindPopup('{{ hole.display_name }}');
 	{% endfor %}
 

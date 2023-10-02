@@ -299,7 +299,7 @@ def get_features(hole_id):
 class CourseFeatureForm(FlaskForm):
     name = fields.StringField("Name")
     description = fields.TextAreaField("Description")
-    coords = CoordiateField("Position")
+    pos = CoordiateField("Position")
     type = fields.SelectField(
         "Type", choices=CourseFeature.FEATURE_TYPE_CHOICES, validators=(DataRequired(),)
     )

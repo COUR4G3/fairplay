@@ -27,8 +27,10 @@ document.addEventListener('htmx:load', (ev) => {
             container: mapEl,
             style: 'https://api.maptiler.com/maps/bright-v2/style.json?key=2JkTIhBjBIY6hGQ9h2t6',
             center: [lon, lat],
-            zoom: initialZoom
+            zoom: (lon || lat) ? initialZoom : 2
         });
+
+        map.fitScreenCoordinates
 
         map.addControl(new maplibregl.FullscreenControl());
         map.addControl(new maplibregl.NavigationControl());
