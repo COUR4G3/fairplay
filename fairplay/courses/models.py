@@ -1,3 +1,4 @@
+import geoalchemy2
 import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import sqlalchemy_utils
@@ -6,7 +7,7 @@ from flask import session
 from werkzeug.local import LocalProxy
 
 from ..auth import current_user
-from ..db import BaseModel, BaseQuery, Coordinates, db
+from ..db import BaseModel, BaseQuery, db
 from ..i18n import _
 
 
@@ -45,7 +46,7 @@ class Course(BaseModel):
     name = sa.Column(sa.String, nullable=False)
     description = sa.Column(sa.Text)
 
-    pos = sa.Column(Coordinates)
+    pos = sa.Column(geoalchemy2.Geography("POINT", spatial_index=False))
 
     games = orm.relationship("Game", lazy="dynamic", back_populates="course")
 
@@ -70,6 +71,12 @@ class Course(BaseModel):
             postgresql_using="gin",
             postgresql_ops={"name": "gin_trgm_ops"},
         ),
+        sa.Index(
+            "ix_course_pos",
+            pos,
+            postgresql_using="gist",
+            postgresql_ops={"pos": "gist_geography_ops_2d"},
+        ),
     )
 
     @property
@@ -88,7 +95,7 @@ class CourseHole(BaseModel):
     index = sa.Column(sa.Integer)
     par = sa.Column(sa.Integer)
 
-    pos = sa.Column(Coordinates)
+    pos = sa.Column(geoalchemy2.Geography("POINT", spatial_index=False))
 
     course_id = sa.Column(
         sqlalchemy_utils.UUIDType(),
@@ -109,6 +116,12 @@ class CourseHole(BaseModel):
         sa.Index("ix_course_hole_index", index, postgresql_where="index IS NOT NULL"),
         sa.Index("ix_course_hole_par", par, postgresql_where="par IS NOT NULL"),
         sa.UniqueConstraint(course_id, number, name="uq_course_hole_number"),
+        sa.Index(
+            "ix_course_hole_pos",
+            pos,
+            postgresql_using="gist",
+            postgresql_ops={"pos": "gist_geography_ops_2d"},
+        ),
     )
 
     @property
@@ -137,8 +150,7 @@ class CourseFeature(BaseModel):
 
     type = sa.Column(sqlalchemy_utils.ChoiceType(FEATURE_TYPE_CHOICES), nullable=False)
 
-    coords = sa.Column(Coordinates)
-    r = sa.Column(sa.Float)
+    pos = sa.Column(geoalchemy2.Geography("POLYGON", spatial_index=False))
 
     hole_id = sa.Column(
         sqlalchemy_utils.UUIDType(),
@@ -151,6 +163,12 @@ class CourseFeature(BaseModel):
     __table_args__ = (
         sa.Index("ix_course_feature_hole_id", hole_id),
         sa.Index("ix_course_feature_type", type),
+        sa.Index(
+            "ix_course_feature_pos",
+            pos,
+            postgresql_using="gist",
+            postgresql_ops={"pos": "gist_geography_ops_2d"},
+        ),
     )
 
     @property

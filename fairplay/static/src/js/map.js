@@ -1,5 +1,5 @@
-import L from 'leaflet';
-import 'leaflet-rotate';
+import maplibregl from 'maplibre-gl';
+
 
 document.addEventListener('htmx:load', (ev) => {
     const mapElList = ev.detail.elt.querySelectorAll('.map');
@@ -23,33 +23,29 @@ document.addEventListener('htmx:load', (ev) => {
             lon = parseFloat(mapEl.dataset.longitude);
         }
 
-        var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 20,
-            maxNativeZoom: 19,
-            opacity: 0.75,
-            attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        const map = new maplibregl.Map({
+            container: mapEl,
+            style: 'https://api.maptiler.com/maps/bright-v2/style.json?key=2JkTIhBjBIY6hGQ9h2t6',
+            center: [lon, lat],
+            zoom: initialZoom
         });
 
-        const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.jpg', {
-            maxZoom: 20,
-            maxNativeZoom: 18,
-            attribution: '© Tile: Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-        });
+        map.addControl(new maplibregl.FullscreenControl());
+        map.addControl(new maplibregl.NavigationControl());
 
-        const map = L.map(mapEl, { center: [lat, lon], layers: [sat, osm], zoom: initialZoom });
-
-        const marker = L.marker([lat, lon], { draggable, autoPan: true }).addTo(map);
+        const marker = new maplibregl.Marker({ color: "var(--bs-primary)", draggable,  });
+        marker.setLngLat([lon, lat]).addTo(map);
 
         if (mapLatInputEl !== undefined) {
             mapLatInputEl.addEventListener('change', (ev) => {
                 const lat = parseFloat(ev.target.value) || 0;
 
-                map.panTo([lat, lon]);
-                marker.setLatLng([lat, lon]);
+                map.panTo([lon, lat]);
+                marker.setLngLat([lon, lat]);
             });
 
             if (draggable) {
-                marker.addEventListener('dragend', (ev) => mapLatInputEl.value = marker.getLatLng().lat.toFixed(4));
+                marker.on('dragend', (ev) => mapLatInputEl.value = marker.getLngLat().lat.toFixed(4));
             }
         }
 
@@ -57,12 +53,14 @@ document.addEventListener('htmx:load', (ev) => {
             mapLonInputEl.addEventListener('change', (ev) => {
                 const lon = parseFloat(ev.target.value) || 0;
 
-                map.panTo([lat, lon]);
-                marker.setLatLng([lat, lon]);
+                map.panTo()
+
+                map.panTo([lon, lat]);
+                marker.setLngLat([lon, lat]);
             });
 
             if (draggable) {
-                marker.addEventListener('dragend', (ev) => mapLonInputEl.value = marker.getLatLng().lng.toFixed(4));
+                marker.on('dragend', (ev) => mapLonInputEl.value = marker.getLngLat().lng.toFixed(4));
             }
         }
     });

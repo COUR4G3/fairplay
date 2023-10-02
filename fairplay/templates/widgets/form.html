@@ -4,59 +4,43 @@
 </div>
 {% endmacro %}
 
-{% macro render_coordinates(field, height=None, initial_zoom=14) %}
+{% macro render_coordinates(field, initial_zoom=14) %}
 {{ render_label(field) }}
 <div class="row" >
   <div class="col-12 mb-3">
-    <div class="map" data-initial-zoom="{{ initial_zoom }}" data-latitude="#{{ field.lat.id }}" data-longitude="#{{ field.lon.id }}" data-draggable="true"></div>
+    <div class="map" data-initial-zoom="{{ initial_zoom }}" data-latitude="#{{ field.x.id }}" data-longitude="#{{ field.y.id }}" data-draggable="true"></div>
   </div>
   <div class="col">
     <input
-      id="{{ field.lat.id }}"
-      name="{{ field.lat.name }}"
+      id="{{ field.x.id }}"
+      name="{{ field.x.name }}"
       type="number"
       step="0.0001"
-      class="form-control map-latitude {% if field.lat.errors %}is-invalid{% endif %}"
-      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.lat.render_kw.description %}{{ field.lat.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.lat.errors %}{{ field.lat.id }}-error-{{ loop.index }} {% endfor %}"
-      value="{{ field.lat.data or '' }}"
-      placeholder="{{ placeholder or field.lat.render_kw.placeholder }}"
+      class="form-control map-latitude {% if field.x.errors %}is-invalid{% endif %}"
+      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.x.render_kw.description %}{{ field.x.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.x.errors %}{{ field.x.id }}-error-{{ loop.index }} {% endfor %}"
+      value="{{ field.x.data or '' }}"
+      placeholder="{{ placeholder or field.x.render_kw.placeholder }}"
     >
   </div>
   <div class="col">
     <input
-      id="{{ field.lon.id }}"
-      name="{{ field.lon.name }}"
+      id="{{ field.y.id }}"
+      name="{{ field.y.name }}"
       type="number"
       step="0.0001"
-      class="form-control map-longitude {% if field.lon.errors %}is-invalid{% endif %}"
-      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.lon.render_kw.description %}{{ field.lon.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.lon.errors %}{{ field.lon.id }}-error-{{ loop.index }} {% endfor %}"
-      value="{{ field.lon.data or '' }}"
-      placeholder="{{ placeholder or field.lon.render_kw.placeholder }}"
+      class="form-control map-longitude {% if field.y.errors %}is-invalid{% endif %}"
+      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.y.render_kw.description %}{{ field.y.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.y.errors %}{{ field.y.id }}-error-{{ loop.index }} {% endfor %}"
+      value="{{ field.y.data or '' }}"
+      placeholder="{{ placeholder or field.y.render_kw.placeholder }}"
     >
   </div>
-  {% if height %}
-  <div class="col">
-    <input
-      id="{{ field.hgt.id }}"
-      name="{{ field.hgt.name }}"
-      type="number"
-      step="1"
-      class="form-control {% if field.hgt.errors %}is-invalid{% endif %}"
-      aria-describedby="{% if field.render_kw.description %}{{ field.id }}-description{% endif %} {% if field.hgt.render_kw.description %}{{ field.hgt.id }}-description{% endif %} {% for error in field.errors %}{{ field.id }}-error-{{ loop.index }} {% endfor %} {% for error in field.hgt.errors %}{{ field.hgt.id }}-error-{{ loop.index }} {% endfor %}"
-      value="{{ field.lat.data or '' }}"
-      placeholder="{{ placeholder or field.hgt.render_kw.placeholder }}"
-    >
-  </div>
-  {% endif %}
 </div>
 {{ render_description(field) }}
-{{ render_description(field.lat) }}
-{{ render_description(field.lon) }}
-{{ render_description(field.hgt) }}
+{{ render_description(field.x) }}
+{{ render_description(field.y) }}
 {{ render_errors(field) }}
-{{ render_errors(field.lat) }}
-{{ render_errors(field.lon) }}
-{{ render_errors(field.hgt) }}
+{{ render_errors(field.x) }}
+{{ render_errors(field.y) }}
 {% endmacro %}
 
 

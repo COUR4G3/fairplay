@@ -12,6 +12,7 @@ Flask-SQLAlchemy~=3.0.5
 Flask-WTF~=1.1.1
 frozendict~=2.3.8
 is-safe-url~=1.0
+geoalchemy2~=0.14.1
 geoip2~=4.7.0
 langchain==0.0.268
 lazy-string==1.0.0
@@ -26,6 +27,7 @@ python-slugify~=8.0.1
 pytz~=2023.3
 redis~=5.0.0
 requests~=2.31.0
+shapely~=2.0.1
 SQLAlchemy-Utils~=0.41.1
 tinycss2~=1.2.1
 werkzeug<3

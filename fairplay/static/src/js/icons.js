@@ -16,6 +16,7 @@ import { faCheck } from '@fortawesome/free-solid-svg-icons/faCheck';
 import { faChevronUp } from '@fortawesome/free-solid-svg-icons/faChevronUp';
 import { faCircleInfo } from '@fortawesome/free-solid-svg-icons/faCircleInfo';
 import { faCircleExclamation } from '@fortawesome/free-solid-svg-icons/faCircleExclamation';
+import { faCircleHalfStroke } from '@fortawesome/free-solid-svg-icons/faCircleHalfStroke';
 import { faCircleQuestion } from '@fortawesome/free-regular-svg-icons/faCircleQuestion';
 import { faClipboard } from '@fortawesome/free-solid-svg-icons/faClipboard';
 import { faClock } from '@fortawesome/free-solid-svg-icons/faClock';
@@ -51,6 +52,7 @@ import { faMessage } from '@fortawesome/free-solid-svg-icons/faMessage';
 import { faMicrosoft } from '@fortawesome/free-brands-svg-icons/faMicrosoft';
 import { faMinus } from '@fortawesome/free-solid-svg-icons/faMinus';
 import { faMobile } from '@fortawesome/free-solid-svg-icons/faMobile';
+import { faMoon } from '@fortawesome/free-solid-svg-icons/faMoon';
 import { faNewspaper } from '@fortawesome/free-solid-svg-icons/faNewspaper';
 import { faPaperclip } from '@fortawesome/free-solid-svg-icons/faPaperclip';
 import { faPaperPlane } from '@fortawesome/free-solid-svg-icons/faPaperPlane';
@@ -65,6 +67,7 @@ import { faSortUp } from '@fortawesome/free-solid-svg-icons/faSortUp';
 import { faStar } from '@fortawesome/free-solid-svg-icons/faStar';
 import { faStackExchange } from '@fortawesome/free-brands-svg-icons/faStackExchange';
 import { faStackOverflow } from '@fortawesome/free-brands-svg-icons/faStackOverflow';
+import { faSun } from '@fortawesome/free-solid-svg-icons/faSun';
 import { faTerminal } from '@fortawesome/free-solid-svg-icons/faTerminal';
 import { faTrash } from '@fortawesome/free-solid-svg-icons/faTrash';
 import { faTriangleExclamation } from '@fortawesome/free-solid-svg-icons/faTriangleExclamation';
@@ -89,6 +92,7 @@ library.add(
   faCheck,
   faChevronUp,
   faCircleExclamation,
+  faCircleHalfStroke,
   faCircleInfo,
   faCircleQuestion,
   faClipboard,
@@ -125,6 +129,7 @@ library.add(
   faMicrosoft,
   faMinus,
   faMobile,
+  faMoon,
   faNewspaper,
   faPaperclip,
   faPaperPlane,
@@ -139,6 +144,7 @@ library.add(
   faSort,
   faSortDown,
   faSortUp,
+  faSun,
   faTerminal,
   faTrash,
   faTriangleExclamation,

@@ -1,10 +1,13 @@
 import uuid
 
+import shapely
 import sqlalchemy as sa
 
 from flask import Blueprint, abort, flash, redirect, render_template, request, url_for
 from flask_wtf import FlaskForm
+from geoalchemy2.shape import from_shape, to_shape
 from wtforms import fields, validators
+from wtforms.utils import unset_value
 from wtforms.validators import DataRequired
 
 from ..admin import admin
@@ -40,25 +43,26 @@ def get_courses():
 
 class CoordiateField(fields.FormField):
     class PositionForm(FlaskForm):
-        lat = fields.FloatField(
+        x = fields.FloatField(
             "Latitude",
             validators=(DataRequired(), validators.NumberRange(min=-180.0, max=180.0)),
         )
-        lon = fields.FloatField(
+        y = fields.FloatField(
             "Longitude",
             validators=(DataRequired(), validators.NumberRange(min=-180.0, max=180.0)),
-        )
-        hgt = fields.FloatField(
-            "Height",
-            validators=(validators.Optional(), validators.NumberRange(min=0.0)),
         )
 
     def __init__(self, label, **kwargs):
         super().__init__(self.PositionForm, label, **kwargs)
 
     def populate_obj(self, obj, name):
-        data = {"lat": self.lat.data, "lon": self.lon.data, "hgt": self.hgt.data}
+        data = from_shape(shapely.Point(self.x.data, self.y.data))
         setattr(obj, name, data)
+
+    def process(self, formdata, data=..., extra_filters=None):
+        if data:
+            data = to_shape(data)
+        return super().process(formdata, data, extra_filters)
 
 
 class CourseForm(FlaskForm):
@@ -143,7 +147,7 @@ def read(id):
 
         flash(_("Course updated"), "success")
 
-    holes = CourseHole.query.filter(CourseHole.course == course)
+    holes = get_holes(id)
     holes = apply_paged_pagination(holes)
 
     return render_template(
@@ -160,6 +164,7 @@ holes = Blueprint(
 
 courses.register_blueprint(holes)
 
+
 def get_hole(course_id, number):
     holes = get_holes(course_id)
     return db.one_or_404(holes.filter(CourseHole.number == number))
@@ -167,7 +172,9 @@ def get_hole(course_id, number):
 
 def get_holes(course_id):
     course = get_course(course_id)
-    return CourseHole.query.filter(CourseHole.course == course)
+    return CourseHole.query.filter(CourseHole.course == course).order_by(
+        CourseHole.number
+    )
 
 
 class CourseHoleForm(FlaskForm):
@@ -183,12 +190,7 @@ class CourseHoleForm(FlaskForm):
 def create_hole(course_id):
     course = get_course(course_id)
 
-    form = CourseHoleForm(
-        data={
-            "number": course.hole_count + 1,
-            "pos": {"lat": course.pos.lat, "lon": course.pos.lon},
-        }
-    )
+    form = CourseHoleForm(data={"number": course.hole_count + 1, "pos": course.pos})
 
     if form.validate_on_submit():
         hole = CourseHole(course=course)
@@ -236,7 +238,7 @@ def delete_hole(course_id, number=None):
 @holes.route("", endpoint="list", methods=["GET"])
 def list_holes(course_id):
     course = get_course(course_id)
-    holes = CourseHole.query.filter(CourseHole.course == course)
+    holes = get_holes(course_id)
 
     q = request.args.get("q")
 
@@ -309,9 +311,7 @@ def create_feature(course_id, number):
     hole = get_hole(course_id, number)
     course = hole.course
 
-    form = CourseFeatureForm(
-        data={"coords": {"lat": hole.pos.lat, "lon": hole.pos.lon}}
-    )
+    form = CourseFeatureForm(data={"pos": hole.pos})
 
     if form.validate_on_submit():
         feature = CourseFeature(hole=hole)
