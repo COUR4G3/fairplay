@@ -30,13 +30,34 @@ document.addEventListener('htmx:load', (ev) => {
             zoom: (lon || lat) ? initialZoom : 2
         });
 
-        map.fitScreenCoordinates
-
         map.addControl(new maplibregl.FullscreenControl());
         map.addControl(new maplibregl.NavigationControl());
 
-        const marker = new maplibregl.Marker({ color: "var(--bs-primary)", draggable,  });
+        const geolocate = new maplibregl.GeolocateControl();
+        map.addControl(geolocate);
+
+        if (!lat && !lon) {
+            map.on('load', () => geolocate.trigger());
+        }
+
+        const marker = new maplibregl.Marker({ color: "var(--bs-primary)", draggable });
         marker.setLngLat([lon, lat]).addTo(map);
+
+        map.doubleClickZoom.disable();
+        map.on('dblclick', function(e) {
+            const { lng: lon, lat } = e.lngLat;
+
+            map.panTo([lon, lat]);
+            marker.setLngLat([lon, lat]);
+
+            if (mapLatInputEl !== undefined) {
+                mapLatInputEl.value = lat.toFixed(4);
+            }
+
+            if (mapLonInputEl !== undefined) {
+                mapLonInputEl.value = lon.toFixed(4);
+            }
+        });
 
         if (mapLatInputEl !== undefined) {
             mapLatInputEl.addEventListener('change', (ev) => {

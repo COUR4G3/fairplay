@@ -22,54 +22,32 @@
 {% block scripts %}
 {{ super() }}
 <script>
-	var osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 20,
-		maxNativeZoom: 19,
-		opacity: 0.75,
-		attribution: '© OpenStreetMap contributors'
+	const map = new maplibregl.Map({
+			container: 'map',
+			style: 'https://api.maptiler.com/maps/bright-v2/style.json?key=2JkTIhBjBIY6hGQ9h2t6',
+			zoom: 2
 	});
 
-	const sat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.jpg', {
-		maxZoom: 20,
-		maxNativeZoom: 18,
-		attribution: '© Tile: Esri — Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community'
-	});
-
-	const map = L.map('map', {
-		center: [{{ course.pos.lat }}, {{ course.pos.lon }}],
-		compassBearing: true,
-		layers: [sat, osm], 
-		rotate: true,
-		rotateControl: {
-			closeOnZeroBearing: false,
-			// position: 'bottomleft',
+	map.addControl(new maplibregl.FullscreenControl());
+	map.addControl(new maplibregl.NavigationControl());
+	
+	const geolocate = new maplibregl.GeolocateControl({
+		positionOptions: {
+				enableHighAccuracy: true
 		},
-		touchRotate: true,
-		zoom: 14,
+		trackUserLocation: true
 	});
 
+	map.addControl(geolocate);
+
+	map.on('load', function() {
+		geolocate.trigger();
+	});
+
+	var marker = null;
 	{% for hole in course.holes %}
-	L.marker([{{ hole.pos.lat }}, {{ hole.pos.lon }}]).addTo(map).bindPopup('{{ hole.display_name }}');
+	marker = new maplibregl.Marker({ color: "var(--bs-primary)" });
+  marker.setLngLat([lon, lat]).addTo(map);
 	{% endfor %}
-
-	function onLocationFound(e) {
-		map.setBearing(e.heading);
-
-		const radius = e.accuracy / 2;
-
-		const locationMarker = L.marker(e.latlng).addTo(map)
-			.bindPopup(`You are within ${radius} meters from this point`).openPopup();
-
-		const locationCircle = L.circle(e.latlng, radius).addTo(map);
-	}
-
-	function onLocationError(e) {
-		alert(e.message);
-	}
-
-	map.on('locationfound', onLocationFound);
-	map.on('locationerror', onLocationError);
-
-	map.locate({setView: true, maxZoom: 18});
 </script>
 {% endblock %}

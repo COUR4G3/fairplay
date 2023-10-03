@@ -6,6 +6,8 @@ import Tooltip from 'bootstrap/js/dist/tooltip';
 
 import * as htmx from 'htmx.org';
 
+import maplibregl from 'maplibre-gl';
+
 import './confirm';
 import './editor';
 import './icons';
@@ -31,9 +33,10 @@ const bootstrap = { Dropdown, Modal, Offcanvas, Toast, Tooltip }
 
 window.bootstrap = bootstrap;
 window.htmx = htmx;
+window.maplibregl = maplibregl;
 
 export {
   bootstrap,
   htmx,
-  L,
+  maplibregl,
 }
