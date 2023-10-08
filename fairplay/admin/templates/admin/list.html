@@ -1,144 +1,187 @@
-{% macro render_title(record) %}{{ record['id'] }}{% endmacro %}
-
 {% macro render_list(
   records,
-  actions=[],
   columns=[],
+  actions=[{'label': 'Delete', 'method': 'DELETE'}],
+  controls={'search': True},
+  filters=[],
+  pagination={},
+  prefix='',
+  base_endpoint='.',
   create=True,
-  create_endpoint='.create',
-  create_endpoint_kwargs={},
+  create_endpoint='create',
   create_label='Create',
-  endpoint_id='id',
-  endpoint_kwargs={},
-  filters={},
-  list_endpoint='.list',
-  list_endpoint_kwargs={},
-  photo=None,
-  read=True,
-  read_endpoint='.read',
-  read_endpoint_kwargs={},
-  title=render_title,
-  title_label='#'
+  list_endpoint='list',
+  read_endpoint='read',
+  endpoint_kwargs={}
 ) %}
-<form id="record-list" action="{{ url_for(list_endpoint, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}" class="card mb-3" method="GET" hx-trigger="keyup changed delay:500ms from:find input[type='search'], change from:.filter-item">
-  <div class="card-header">
-    <div class="row g-2">
-      <div class="col-auto">
-        {% if create %}
-        <a class="btn btn-primary" href="{{ url_for(create_endpoint, **dict(endpoint_kwargs, **create_endpoint_kwargs)) }}">{{ create_label }}</a>
+
+<form id="{{ prefix }}record-list" class="card mb-3" action="{{ url_for(base_endpoint + list_endpoint, **endpoint_kwargs) }}" method="GET" hx-trigger="input changed delay:500ms from:find input[type='search'], change from:.filter-item, click from:.sort-item">
+
+  <div class="card-header d-flex justify-content-between align-items-center pe-3">
+    <div class="me-1">
+      {% if create is not false %}
+      <a class="btn btn-primary text-nowrap me-1" href="{{ url_for(base_endpoint + create_endpoint, **endpoint_kwargs) }}"><i class="fa-solid fa-plus me-1"></i> {{ create_label or 'Create' }}</a>
+      {% endif %}
+
+      {% for action in actions|selectattr('button')|rejectattr('button', 'false')|rejectattr('multi', 'false') %}
+      <button class="btn btn-{% if action.button is true %}outline-primary{% else %}{{ action.button }}{% endif %} me-1 d-none d-mb-block-inline" hx-{{ action.method or 'POST' }}="#" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
+      {% endfor %}
+    </div>
+    <div class="d-flex align-items-center ms-auto">
+      <div class="input-group me-2">
+        {% if controls.search %}
+        <span class="input-group-text text-bg-secondary px-2">
+          <i class="fa fa-magnifying-glass fa-fw"></i>
+        </span>
+        <input id="{{prefix}}search" type="search" name="{{prefix}}q" class="form-control" placeholder="Search ..." value="{{ request.args.q or '' }}">
         {% endif %}
-        {% for action in actions|selectattr('button', 'true') %}
-        <button class="btn btn-{{ action.button_classname or 'secondary' }}" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **action.endpoint_kwargs or {}) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
-        {% endfor %}
-      </div>
-      <div class="col">
-        <div class="input-group">
-          <input class="form-control ms-auto" style="max-width:384px;" type="search" name="q" value="{{ request.args.q or '' }}" placeholder="Search">
-          <button class="d-none" type="submit" hx-params="q"></button>
-          {% if filters %}
-          <button class="btn btn-link text-reset pe-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-filter fa-fw"></i></button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            {% for name, filters in filters|items %}
-            {% if filters|count > 1 and not loop.first %}<li><hr class="dropdown-divider"></li>{% endif %}
-            {% for filter in filters %}
-            <li>
-              <input type="{% if filters|count > 1 %}radio{% else %}checkbox{% endif %}" class="btn-check filter-item" id="filter-{{ name }}-{{ filter.value }}" name="{{ name }}" value="{{ filter.value }}" {% if request.args[name] == filter.value %}checked{% endif %} autocomplete="off">
-              <label class="dropdown-item" for="filter-{{ name }}-{{ filter.value }}">{{ filter.label }}</label>
-            </li>
-            {% endfor %}
-            {% if filters|count > 1 and not loop.last %}<li><hr class="dropdown-divider"></li>{% endif %}
-            {% endfor %}
-          </ul>
-          {% endif %}
-          {% if actions %}
-          <button class="btn btn-link text-reset ps-2 pe-0" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            {% for action in actions|rejectattr('multi', 'false')|rejectattr('button', 'true') %}
-            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **dict(endpoint_kwargs, **action.endpoint_kwargs or {})) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-        </div>
+  
+        {{ render_filters(filters) }}
+        {{ render_actions(actions) }}
       </div>
     </div>
   </div>
+
   <table class="table table-sm table-striped align-middle mb-0 shadow-none">
-    <thead>
-      <tr>
-        {% if actions %}
-        <th style="width:0" scope="col">
-          <input class="form-check-input table-select-all" type="checkbox" id="select-all" value="*" aria-label="Select all">
-        </th>
-        {% endif %}
-        {% if photo %}<th style="width:0" scope="col"><span class="visually-hidden">Photo</span></th>{% endif %}
-        {% if read %}
-        <th scope="col">{{ title_label }}</th>
-        {% endif %}
-        {% for column in columns %}
-        <th scope="col">{{ column.label }}</th>
-        {% endfor %}
-        <th style="width:0" scope="col"></th>
-      </tr>
-    </thead>
+    {{ render_header(columns, options=header) }}
     <tbody>
-      {% for item in records.items %}
-      <tr {% if item.active is false %}style="filter:grayscale(0.8);"{% endif %}>
-        {% if actions %}
-        <td>
-          <input class="form-check-input table-select" type="checkbox" name="ids[]" value="{{ item.id }}" aria-label="Select {{ item[endpoint_id] }}">
-        </td>
-        {% endif %}
-        {% if photo %}
-        <td>
-          <img class="rounded-circle" width="24" height="24" src="{{ item[photo] }}">
-        </td>
-        {% endif %}
-        {% if read %}
-        <th scope="row"><a href="{{ url_for(read_endpoint, **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **read_endpoint_kwargs))) }}">{% if title is callable %}{{ title(item) }}{% else %}{{ item[title] }}{% endif %}</a></th>
-        {% endif %}
-        {% for column in columns %}
-        <td>{% if column.render %}{{ column.render(item[column.name]) }}{% else %}{{ item[column.name] }}{% endif %}</td>
-        {% endfor %}
-        <td>
-          {% if actions %}
-          <button class="btn btn-link icon-link text-reset px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
-          <ul class="dropdown-menu dropdown-menu-end">
-            {% for action in actions|rejectattr('multi', 'true')|rejectattr('button', 'true') %}
-            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method,  **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
-            {% endfor %}
-          </ul>
-          {% endif %}
-        </td>
-      </tr>
+      {% for record in records %}
+      {{ render_record(record, actions, columns) }}
       {% else %}
       <tr>
-        <td class="text-center" colspan="99">No results found!</td>
+        <td class="text-center pt-5 pb-3" colspan="99">
+          <img class="img-fluid mb-5" style="max-height:384px;" src="data:image/svg+xml;base64,PHN2ZyBkYXRhLW5hbWU9IkxheWVyIDEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9Ijg4NS4yMDA3OSIgaGVpZ2h0PSI3MDguMzE2NTUiIHZpZXdCb3g9IjAgMCA4ODUuMjAwNzkgNzA4LjMxNjU1IiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayI+PHBhdGggaWQ9ImFhYmQ0YWZlLTY0MmMtNDMyNy1hM2YyLTA4ZWM4OTI3NjMwOS0zOTAiIGRhdGEtbmFtZT0iUGF0aCA0ODIiIGQ9Ik0zMDUuOTU3NTksODAzLjk3NjM3cy0xMi43NTMtMzEuMzkxLDI1LjUwNS01NC45MzRaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiNmMGYwZjAiLz48cGF0aCBpZD0iZTMwMmEyMDctOThkZS00Nzk4LWFlZGMtNzlhNjNjZmYyNDI3LTM5MSIgZGF0YS1uYW1lPSJQYXRoIDQ4MyIgZD0iTTI5MC4yNzM2Myw4MDMuNDA1MzNzLTMuODktMjIuMzc0LTM0LTIyLjE4MloiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xNTcuMzk5NjEgLTk1Ljg0MTcyKSIgZmlsbD0iI2YwZjBmMCIvPjxwYXRoIGlkPSJlMTZhOGEwYi0xMTVlLTQ4NzctYTlkNi0yN2E3MmNmODViNzMtMzkyIiBkYXRhLW5hbWU9IlBhdGggNDgyIiBkPSJNNzMyLjk1NzU5LDgwMy45NzYzN3MtMTIuNzUzLTMxLjM5MSwyNS41MDUtNTQuOTM0WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTE1Ny4zOTk2MSAtOTUuODQxNzIpIiBmaWxsPSIjZjBmMGYwIi8+PHBhdGggaWQ9ImIwNzA2YjQ4LTA4ZTAtNDNlYS1hYjI1LTM2Y2ZhZWU5MGMxMi0zOTMiIGRhdGEtbmFtZT0iUGF0aCA0ODMiIGQ9Ik03MTcuMjczNjMsODAzLjQwNTMzcy0zLjg5LTIyLjM3NC0zNC0yMi4xODJaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiNmMGYwZjAiLz48Y2lyY2xlIGN4PSI1NjUuMDUzNjgiIGN5PSIzOTQuMDMwNTMiIHI9IjExMC44NTI5IiBmaWxsPSIjZjBmMGYwIi8+PHBvbHlnb24gcG9pbnRzPSI1NjUuMzU4IDM5NC4wMyA1NjUuNjYzIDM5NC4wMyA1NzEuMTQ1IDcwOC4zMTcgNTU5LjU3MiA3MDguMzE3IDU2NS4zNTggMzk0LjAzIiBmaWxsPSIjZjBmMGYwIi8+PGNpcmNsZSBjeD0iODAzLjA1MzY4IiBjeT0iNDc5LjA4NTQyIiByPSI4MC44NTI5IiBmaWxsPSIjZjBmMGYwIi8+PHBvbHlnb24gcG9pbnRzPSI4MDMuMjc2IDQ3OS4wODUgODAzLjQ5OCA0NzkuMDg1IDgwNy40OTYgNzA4LjMxNyA3OTkuMDU1IDcwOC4zMTcgODAzLjI3NiA0NzkuMDg1IiBmaWxsPSIjZjBmMGYwIi8+PHBhdGggZD0iTTUxMi43Mjc3Miw1NzUuNzQ4MjhhMTAuNjYzNiwxMC42NjM2LDAsMCwwLDguOTk5NDYtMTMuNjUyTDU1Mi40NjIsNTM5LjkyODc2bC0xOC40MDkyNS02Ljk5MTU5LTI2LjM2NCwyMi4xMjI1MWExMC43MjE0MiwxMC43MjE0MiwwLDAsMCw1LjAzODk0LDIwLjY4ODZaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiNmZmI2YjYiLz48cG9seWdvbiBwb2ludHM9IjMzMi43OTYgNjk3LjM1MyAzMjMuMDM3IDY5Ny4zNTIgMzE4LjM5NCA2NTkuNzEgMzMyLjc5OCA2NTkuNzEgMzMyLjc5NiA2OTcuMzUzIiBmaWxsPSIjZmZiNmI2Ii8+PHBhdGggZD0iTTQ5Mi42ODQzMyw4MDIuNjU0NjdsLTMxLjQ2NzctLjAwMTE2di0uMzk4YTEyLjI0ODc2LDEyLjI0ODc2LDAsMCwxLDEyLjI0ODExLTEyLjI0NzkxaC4wMDA3N2wxOS4yMTk0LjAwMDc4WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTE1Ny4zOTk2MSAtOTUuODQxNzIpIiBmaWxsPSIjMmYyZTQxIi8+PHBvbHlnb24gcG9pbnRzPSIyNTguMjUzIDY5Ny4zNTMgMjQ4LjQ5NCA2OTcuMzUyIDI0My44NTIgNjU5LjcxIDI1OC4yNTUgNjU5LjcxIDI1OC4yNTMgNjk3LjM1MyIgZmlsbD0iI2ZmYjZiNiIvPjxwYXRoIGQ9Ik00MTguMTQxODksODAyLjY1NDY3bC0zMS40Njc3LS4wMDExNnYtLjM5OGExMi4yNDg3NiwxMi4yNDg3NiwwLDAsMSwxMi4yNDgxLTEyLjI0NzkxaC4wMDA3OGwxOS4yMTk0LjAwMDc4WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTE1Ny4zOTk2MSAtOTUuODQxNzIpIiBmaWxsPSIjMmYyZTQxIi8+PHBvbHlnb24gcG9pbnRzPSIyNjUuNzkxIDQ4OC4wMzEgMjQ1LjEwOSA2MDEuMTM1IDIzNy44NzUgNjkwLjk3MyAyNjEuMzYxIDY4OS44MTggMjc0LjczIDYwMi41NzggMzA3Ljk2IDUyNi42MTggMzE3Ljg1IDY4OS42MDggMzM5LjQ3IDY4OS42NzggMzUxLjEwMyA0ODMuNTA3IDI2NS43OTEgNDg4LjAzMSIgZmlsbD0iIzJmMmU0MSIvPjxwYXRoIGQ9Ik01MTEuMTUwMDYsNDU0LjQxNWwtMjguOTg4OS0xMS41MzQzLTMzLjI1NjEyLDMuODA1TDQyMC43MTIyMSw0NjIuMjcxczguNjI0LDEwOC4xNTc2NC0zLjg3NjY0LDEzMy41Mjc0N2MwLDAsMTAuMDE2LDEzLjg3MzU4LDUwLjgyNjQzLDEwLjQ4NjgzLDAsMCwzOS43NTMxMi01LjAyNDMxLDQwLjczODUzLTE4LjA2MDA4czEuMTkzMzItMzYuNzM3LDEuMTkzMzItMzYuNzM3bDEzLjc5ODktNDcuNTUwNzVaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiMyZmIzODAiLz48cGF0aCBkPSJNNDMyLjA0NCw0NjQuMzUzbC0xMS4zMzE4My0yLjA4MnMtMTIuMDU3MzMsNS4yODY3NS0xMS45MzM1OCwyMS4wNDA2NC0yMS4zMDEyNSw2OC41NzA1LDQuMzMxNTQsNzAuNzg0NzlTNDMyLjA0NCw1MTYuNjQyMzMsNDMyLjA0NCw1MTYuNjQyMzNaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiMyZmIzODAiLz48cGF0aCBkPSJNNTAxLjk1NTc3LDQ2MS4xMjYwNmw5LjE5NDI5LTYuNzExMDlzMTQuMDM3NjEsMy4xNzExMiwxOS4yMzAwNywxNC40NzE0NWMwLDAsNTcuNTY1NzEsNDEuNzQ5OTEsNDEuNzMxOTMsNTcuNTgzNjlzLTQ4LjExMDMyLDM1LjMyMTUtNDguMTEwMzIsMzUuMzIxNWwtMTEuOTUwMzgtMTMuNTMxMDcsMjkuNjQ4ODItMjYuODU5NjQtMjQuMzIzLTIyLjE1ODA4WiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTE1Ny4zOTk2MSAtOTUuODQxNzIpIiBmaWxsPSIjMmZiMzgwIi8+PHBhdGggZD0iTTQ4Ny4yNTUxOSw0MTIuODkzMjJhMjMuNzk5MzgsMjMuNzk5MzgsMCwwLDEtNDcuNTk4NzUsMHYtLjkxMzQ5YTIzLjc5OTM4LDIzLjc5OTM4LDAsMCwxLDQ3LjU4MDUuOTEzNDlaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiNmZmI2YjYiLz48cGF0aCBkPSJNNDY3LjA3MzIsNDA5LjA1NjU4YzEuNTIyNDgtLjI0OTY5LDMuMTcyODYtLjQ4NzIsNC41MzcuMjEzMTUsMi45NjU3OCwxLjUxNjM5LDIuMjgzNzEsNS44MTU4NywzLjkwMzYxLDguNjUzNzcuNjM5NDQsMS4xMjY2NCwxLjY3NDczLDIuMDQ2MjEsMi4xMDEsMy4yNjQxOXMuMTY0NDQsMi43NDA0Ni44MzQzMiwzLjkxNTgxYy45NjgzMSwxLjY5OTA5LDMuNTkzMDYsMS45NDg3Nyw1LjMxNjQ4LjkzNzg1YTguNDU0NjUsOC40NTQ2NSwwLDAsMCwzLjMzNzI2LTQuNzA3NWMuNTcyNDUtMS42MTk5MiwxLjA1MzU0LTMuNDEwMzYsMi40MzYtNC40N2E1LjE2NDA2LDUuMTY0MDYsMCwwLDAsMS4zMzM2OS0xLjA5MDA5LDMuMjg4NTMsMy4yODg1MywwLDAsMCwuMzE2NjktMS44NjM1MWMwLTQuMTE2NzgtLjYzOTQ0LTcuMzA3OS4yOTIzLTExLjI5Njc5LDEuNDkyLTYuNDMwOTUsMi44NTYxNy05LjYwOTg5LTEuODY5NjEtMTQuMzc4MjlhMTYuMzUxNDIsMTYuMzUxNDIsMCwwLDAtOC45MDM0NS00LjU1NTI2Yy0zLjA0NS0uNDk5MzctNy41MjcxMiwzLjc1MTM5LTEwLjYwODYyLDMuNjU0LTcuODM3NzEtLjMxMDU5LTE0LjQ1MTM1LTcuNTY5NzYtMjEuOTIzNjktNS4yMjUxNWExNS40MTk3LDE1LjQxOTcsMCwwLDAtOC4wNTA4NSw1LjkyNTQ5Yy0zLjY1Mzk0LDUuMzgzNDgtMy4zMjUxLDcuNDY2MjMtMi43OTUyOCwxMy44OTEwOWEyLjM3NTE4LDIuMzc1MTgsMCwwLDAsLjQwOCwxLjM3MDIzYy4yNzQwNi4zMjg4Ni43MTg2MS41MDU0Ny45ODY1Ni44NDA0MWEyLjA3NjY5LDIuMDc2NjksMCwwLDEsLjMwNDUsMS40OTgxMywxMC4wNzg0NiwxMC4wNzg0NiwwLDAsMS0uNzI0NywzLjA0NSwxLjI1NDQ1LDEuMjU0NDUsMCwwLDAtLjEwOTYyLDEuMDk2MTksMS4xMDgzNiwxLjEwODM2LDAsMCwwLC42MDkuNDE0MTFjMy4wNDQ5NSwxLjA5NjE5LDYuMzMzNTItMS4wMTcsOS41OTE2MS0uOTYyMjFzNi4zNTE3OCwyLjIzNSw5LjcxMzQyLDEuNzZDNDYxLjA3NDY1LDQxMC41MzAzNCw0NjQuMDgzMDcsNDA5LjU0OTg2LDQ2Ny4wNzMyLDQwOS4wNTY1OFoiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xNTcuMzk5NjEgLTk1Ljg0MTcyKSIgZmlsbD0iIzJmMmU0MSIvPjxwYXRoIGQ9Ik00NjYuOTE1NjQsNTQxLjM2NjVhMi44MzksMi44MzksMCwwLDEtLjYyOTI3LjE2MjIxbC0yNi40MjcxMywzLjY4OWEyLjg0NCwyLjg0NCwwLDAsMS0zLjA2MTMtMS44MDQzbC0yMi43NDc1NC01OS4xOTFhMi44NTYxNSwyLjg1NjE1LDAsMCwxLDIuMDQ0LTMuODEyNDdsLjAwMDE0LDAsMjQuODUyLTUuNTQ1ODZhMi4yNzA3NCwyLjI3MDc0LDAsMCwwLC41NTE2Mi0uMjAxNzlsMjQuMTcyMDgtMTIuNjM3OTNhMi44MjkxMSwyLjgyOTExLDAsMCwxLC41ODc2Mi0uMjI4NjlsMjYuNjAxNTctNy4wOTE3YTIuODUwNzEsMi44NTA3MSwwLDAsMSwzLjQwMiwxLjczNTE3bDE5LjgzNDQ3LDUxLjYxMDg4YTIuODQyLDIuODQyLDAsMCwxLS4zNzUyMywyLjczMDYxbC02Ljg1OTUyLDkuMjExNTlhMi44NTIzOSwyLjg1MjM5LDAsMCwxLTEuMjY2MzguOTYwMDZsLTE0Ljk5MSw1Ljc2MTE1YTIuMjU1LDIuMjU1LDAsMCwwLS4zMTE1LjE0ODA4TDQ2Ny4zMTIsNTQxLjE3ODI3QTIuODU2MzIsMi44NTYzMiwwLDAsMSw0NjYuOTE1NjQsNTQxLjM2NjVaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiNmZmYiLz48cGF0aCBkPSJNNDc5LjIxMDk0LDQ2Mi41OTQ0NGwtMy4zNzgwOC45MDA5NS04Ljk1MTg4LDIuMzg3NTUtLjAxNi4wMDM2Ni0xMi4yNTU4LDYuNDA4MjktNC41NDgyMiwyLjM3ODU4LS4wMDIxMi4wMDA4MS02LjgzMSwzLjU3MTE4LS4xODczNC4wNDIyLTcuMDk2MjMsMS41ODI0OS0zLjQyOTYxLjc2NjgyLTEzLjk4ODIsMy4xMjEzNCwyMS45NTk3MSw1Ny4xNDA5MiwxNC40MTQ2OC0yLjAxMTQ4LDMuNTM0MzgtLjQ5NDI1LDcuNTMzMjItMS4wNTI4LjA4NzQ0LS4wMTEyNiwyNC4yMDctMTMuODczOTIsMTQuNzI4MTktNS42NjAxNiw2LjcyNDQ4LTkuMDI5ODItMTkuMTE1NDgtNDkuNzQwMDdaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIGZpbGw9IiNlNGU0ZTQiLz48cmVjdCB4PSI0MjAuOTUzNTEiIHk9IjQ4MS4wOTc4OCIgd2lkdGg9Ijc4LjAxNTc4IiBoZWlnaHQ9IjMuNDc2NDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yOTkuOTkyNjQgMTAxLjI5NjM4KSByb3RhdGUoLTIxLjAyMjE1KSIgZmlsbD0iI2ZmZiIvPjxyZWN0IHg9IjQyNS4xMTA1MSIgeT0iNDkxLjkxNDczIiB3aWR0aD0iNzguMDE1NzgiIGhlaWdodD0iMy40NzY0MiIgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoLTMwMy41OTYyNyAxMDMuNTA3NTcpIHJvdGF0ZSgtMjEuMDIyMTUpIiBmaWxsPSIjZmZmIi8+PHJlY3QgeD0iNDMzLjUwNzYiIHk9IjUxMy43NjQ3MSIgd2lkdGg9Ijc4LjAxNTc4IiBoZWlnaHQ9IjMuNDc2NDIiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0zMTAuODc1NTkgMTA3Ljk3NDE0KSByb3RhdGUoLTIxLjAyMjE1KSIgZmlsbD0iI2ZmZiIvPjxwb2x5Z29uIHBvaW50cz0iMzIxLjgxMSAzNjYuNzUzIDM0My42MTMgNDIzLjQ4MyAzNDAuMzY4IDQyNC43MyAzMTguNDMzIDM2Ny42NTQgMzIxLjgxMSAzNjYuNzUzIiBmaWxsPSIjZmZmIi8+PHBvbHlnb24gcG9pbnRzPSIyOTcuMjEgMzc2LjQ1MyAyOTIuNzMzIDM4OC45MSAyOTEuMTgxIDM5My4yMyAyODcuNTYgNDAzLjMxMiAyODYuNzg0IDQwNS40NjcgMjg2LjAwNyA0MDcuNjMzIDI4NC45ODUgNDEwLjQ3NiAyNzcuNjQ2IDQzMC45MDEgMjc1LjczOCA0MjUuOTM2IDI4MS43MjIgNDA5LjI4IDI4My4wNzYgNDA1LjUwOSAyODMuMjc0IDQwNC45NTkgMjg0Ljg3NSA0MDAuNSAyODYuODk1IDM5NC44NzggMjg4LjQ0OCAzOTAuNTU2IDI5Mi42NTkgMzc4LjgzMyAyOTIuNjYxIDM3OC44MzIgMjk3LjIxIDM3Ni40NTMiIGZpbGw9IiNmZmYiLz48cG9seWdvbiBwb2ludHM9IjI3OC41NDUgMzg0LjAyOCAzMDEuMDM1IDQ0Mi41NTIgMjk3LjUwMSA0NDMuMDQ2IDI3NS4xMTUgMzg0Ljc5NSAyNzguNTQ1IDM4NC4wMjgiIGZpbGw9IiNmZmYiLz48Y2lyY2xlIGN4PSIyNzMuNzMwOTUiIGN5PSI0MjkuNzE0OSIgcj0iMTAuMzUyODUiIGZpbGw9IiNmZmI2YjYiLz48Y2lyY2xlIGN4PSI3MDEuMjI1MTEiIGN5PSIxODMuOTc1NjciIHI9IjE4My45NzU2OCIgZmlsbD0iI2U0ZTRlNCIvPjxwYXRoIGQ9Ik05OTQuNDY2NDMsMTU2LjkzNjA5QTE4My45OSwxODMuOTksMCwwLDEsNjg3LjkwODU3LDM1MS42NTA1NiwxODMuOTkxNTIsMTgzLjk5MTUyLDAsMSwwLDk5NC40NjY0MywxNTYuOTM2MDlaIiB0cmFuc2Zvcm09InRyYW5zbGF0ZSgtMTU3LjM5OTYxIC05NS44NDE3MikiIG9wYWNpdHk9IjAuMSIgc3R5bGU9Imlzb2xhdGlvbjppc29sYXRlIi8+PHBvbHlnb24gcG9pbnRzPSI3MDAuNzIgMTgzLjk3NSA3MDAuMjE0IDE4My45NzUgNjkxLjExNiA3MDUuNTc3IDcxMC4zMjMgNzA1LjU3NyA3MDAuNzIgMTgzLjk3NSIgZmlsbD0iI2U0ZTRlNCIvPjxwYXRoIGQ9Ik05OTIuMzk5NjEsODAzLjY0MzIyaC04MzRhMSwxLDAsMCwxLDAtMmg4MzRhMSwxLDAsMCwxLDAsMloiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0xNTcuMzk5NjEgLTk1Ljg0MTcyKSIgZmlsbD0iI2NhY2FjYSIvPjwvc3ZnPg==">
+          
+          <h6>No {% if request.args %}results{% else %}records{% endif %} found!</h6>
+          
+          {% if request.args %}
+          <p>You can adjust your search terms or filters.</p>
+          <a class="text-decoration-none" href="{{ url_for(base_endpoint + list_endpoint, **endpoint_kwargs) }}"><i class="fa fa-filter-circle-xmark"></i> Clear filters</a>
+          {% else %}
+          <p>There's nothing here yet.</p>
+          {% endif %}
+        </td>
       </tr>
       {% endfor %}
     </tbody>
   </table>
-  <div class="card-footer border-top-0">
-    <div class="row align-items-center">
-      <div class="col-auto">
-        Showing <span class="text-body-emphasis">{{ [((records.page - 1) * records.per_page + 1), records.total]|min }}</span> - <span class="text-body-emphasis">{{ [(records.page * records.per_page), records.total]|min }}</span> of <span class="text-body-emphasis">{{ records.total }}</span> records
-      </div>
-      <div class="col">
-        <nav aria-label="List pagination">
-          <ul class="pagination justify-content-end mb-0">
-            <li class="page-item">
-              <a class="page-link {% if not records.has_prev %}disabled{% endif %}" href="{% if records.has_prev %}{{ url_for(list_endpoint, page=records.prev_num, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Previous">
-                <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
-              </a>
-            </li>
-            <li class="page-item">
-              <a class="page-link {% if not records.has_next %}disabled{% endif %}" href="{% if records.has_next %}{{ url_for(list_endpoint, page=records.next_num, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Next">
-                <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
-              </a>
-            </li>
-          </ul>
-        </nav>
-      </div>
+
+  {{ render_pagination(records, options=pagination) }}
+</div>
+{% endmacro %}
+
+{% macro render_actions(actions) %}
+{% with applicable_actions = actions|rejectattr('multi', 'false')|list %}
+{% if applicable_actions %}
+<button class="btn btn-secondary px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
+<ul class="dropdown-menu dropdown-menu-end">
+  {% for action in applicable_actions %}
+  <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="#" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+  {% endfor %}
+</ul>
+{% endif %}
+{% endwith %}
+{% endmacro %}
+
+{% macro render_filters(filters) %}
+{% if filters %}
+<button class="btn btn-secondary text-reset px-2" type="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fa fa-filter fa-fw"></i></button>
+<ul class="dropdown-menu dropdown-menu-end">
+  {% for filter in filters %}
+
+  {% if filter['values'] is not callable %}
+  {% for value, label in filter['values'] %}
+  <li>
+    <input type="radio" class="btn-check filter-item" id="filter-{{ filter.name }}-{{ value }}" name="{{ filter.name }}" value="{{ value }}" {% if request.args[filter.name] == value %}checked{% endif %} autocomplete="off">
+    <label class="dropdown-item" for="filter-{{ filter.name }}-{{ value }}">{{ label }}</label>
+  </li>
+  {% endfor %}
+  {% else %}
+  <li>
+    <input type="checkbox" class="btn-check filter-item" id="filter-{{ filter.name }}-{{ filter.value }}" name="{{ filter.name }}" value="{{ filter.value }}" {% if request.args[filter.name] == filter.value %}checked{% endif %} autocomplete="off">
+    <label class="dropdown-item" for="filter-{{ filter.name }}-{{ filter.value }}">{{ filter.label }}</label>
+  </li>
+  {% endif %}
+
+  {% if not loop.last %}
+  <li><hr class="dropdown-divider"></li>
+  {% endif %}
+
+  {% endfor %}
+</ul>
+{% endif %}
+{% endmacro %}
+
+{% macro render_header(columns, options={}) %}
+<thead>
+  <th style="width:0">
+    {% if records %}
+    <input id="{{ prefix }}select-all" class="form-check table-select-all mb-0" type="checkbox" name="{{ prefix }}ids" value="all" aria-label="Select all">
+    {% endif %}
+  </th>
+  {% for column in columns %}
+  <th>
+    {% if column.sort is not false %}
+    <button type="button" name="order" value="{% if request.args.get('order') == column.name %}-{% endif %}{{ column.name }}" class="btn btn-link d-flex justify-content-between align-items-center text-decoration-none text-reset p-0 w-100 sort-item">
+      <span class="flex-grow-1 text-{{ column.align or 'start' }}">{{ column.label or columns.name|title }}</span>
+      <span>
+        <i class="fa fa-sort{% if request.args.get('order') == column.name %}-up{% elif request.args.get('order') == '-' + column.name %}-down{% endif %} fa-fw"></i><span class="visually-hidden">Sort {% if request.args.get('order') == column.name %}descending{% else %}ascending{% endif %}</span>
+      </span>
+    </button>
+    {% else %}
+    {{ column.label or columns.name|title }}
+    {% endif %}
+  </th>
+  {% endfor %}
+  <th scope="row" style="width:0"></th>
+</thead>
+{% endmacro %}
+
+{% macro render_pagination(records, options={}) %}
+{% if options is not false %}
+<div class="card-footer border-top-0">
+  <div class="row align-items-center">
+    <div class="col-auto">
+      Showing <span class="text-body-emphasis">{{ [((records.page - 1) * records.per_page + 1), records.total]|min }}</span> - <span class="text-body-emphasis">{{ [(records.page * records.per_page), records.total]|min }}</span> of <span class="text-body-emphasis">{{ records.total }}</span> records
+    </div>
+    <div class="col">
+      <nav aria-label="List pagination">
+        <ul class="pagination justify-content-end mb-0">
+          <li class="page-item">
+            <a class="page-link {% if not records.has_prev %}disabled{% endif %}" href="{% if records.has_prev %}{{ url_for(list_endpoint, page=records.prev_num, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Previous">
+              <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
+            </a>
+          </li>
+          <li class="page-item">
+            <a class="page-link {% if not records.has_next %}disabled{% endif %}" href="{% if records.has_next %}{{ url_for(list_endpoint, page=records.next_num, **dict(endpoint_kwargs, **list_endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Next">
+              <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
   </div>
-</form>
+</div>
+{% endif %}
+{% endmacro %}
+
+{% macro render_record(record, actions, columns) %}
+<tr>
+  <th scope="row" style="width:0"><input id="{{ prefix }}select-{{ id }}" class="form-check table-select mb-0" type="checkbox" name="{{ prefix }}ids" value="{{ id }}" aria-label="Select {{ id }}"></th>
+  {% for column in columns %}
+  <td class="text-{{ column.align or 'start' }}">
+    {{ column.render and column.render(record) or record[column.name] }}
+  </td>
+  {% endfor %}
+  <th scope="row" style="width:0">
+    {% if actions %}
+    <button class="btn btn-link icon-link text-reset px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
+    <ul class="dropdown-menu dropdown-menu-end">
+      {% for action in actions|rejectattr('multi', true) %}
+      <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method,  **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+      {% endfor %}
+    </ul>
+    {% endif %}
+  </th>
+</tr>
 {% endmacro %}

@@ -8,62 +8,22 @@
 {% if course %}{{ course.name }}{% else %}New{% endif %}
 {% endblock %}
 
-{% block breadcrumbs %}
-{{ super() }}
-<li class="breadcrumb-item"><a href="{{ url_for('.list') }}">Courses</a></li>
-{% endblock %}
-
 {% block main %}
-{{ super() }}
 <div class="container">
+  <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '/';">
+    <ol class="breadcrumb border rounded-0 shadow-sm">
+      <li class="breadcrumb-item"><a href="/admin" title="Dashboard"><i class="fa-solid fa-cog fa-fw"></i></a></li>
+      <li class="breadcrumb-item"><a href="/admin/courses">Courses</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% if course %}{{ course.name }}{% else %}New{% endif %}</li>
+    </ol>
+  </nav>
+
   {% call
     render_form(
-      course,
-      actions=[
-        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete this course? This operation is irreversible.'},
-      ],
+      course
     ) 
   %}
-  <div class="row flex-row-reverse flex-md-row">
-    <div class="col-12 col-md">
-      <div class="row" style="max-width:768px;">
-        <div class="col-md-12 mb-3">
-          {{ form_widgets.render_field(form.name) }}
-        </div>
-        <div class="col-md-12 mb-3 h-100">
-          {{ form_widgets.render_textarea(form.description, editor=True) }}
-        </div>
-        <div class="col-md-12 mb-3">
-          {{ form_widgets.render_coordinates(form.pos) }}
-        </div>
-      </div>
-    </div>
-    <div class="col-12 col-md-3 col-xxl-2 order-first order-md-last">
-      
-    </div>
-  </div>
+
   {% endcall %}
-
-  {% if course %}
-  <h2 class="my-3">Holes</h2>
-
-  {{
-    render_list(
-      holes,
-      actions=[
-        {'endpoint': '.holes.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these holes? This operation is irreversible.'},
-      ],
-      columns=[
-        {'name': 'name', 'label': 'Name'},
-      ],
-      create_endpoint=".holes.create",
-      endpoint_kwargs={'course_id': course.id},
-      endpoint_id='number',
-      list_endpoint=".holes.list",
-      read_endpoint=".holes.read",
-      title='number'
-    ) 
-  }}
-  {% endif %}
 </div>
 {% endblock %}

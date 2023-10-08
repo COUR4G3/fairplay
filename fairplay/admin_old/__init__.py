@@ -1,5 +1,3 @@
-"""Administration interface."""
-
 from .routes import admin
 
 

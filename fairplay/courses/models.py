@@ -3,7 +3,7 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import sqlalchemy_utils
 
-from flask import session
+from flask import session, url_for
 from werkzeug.local import LocalProxy
 
 from ..auth import current_user
@@ -81,8 +81,6 @@ class Course(BaseModel):
 
     @property
     def photo_url(self):
-        from flask import url_for
-
         anchor = self.name.lstrip()[0].lower()
         return url_for("static", filename="img/profile.svg", _anchor=anchor)
 

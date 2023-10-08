@@ -2,6 +2,8 @@ import sqlalchemy as sa
 import sqlalchemy.orm as orm
 import sqlalchemy_utils
 
+from flask import url_for
+
 from ..courses.models import current_course
 from ..db import BaseModel, BaseQuery
 
@@ -58,3 +60,8 @@ class Player(BaseModel):
         ),
         sa.UniqueConstraint(course_id, player_id, name="uq_player_id"),
     )
+
+    @property
+    def photo_url(self):
+        anchor = self.name.lstrip()[0].lower()
+        return url_for("static", filename="img/profile.svg", _anchor=anchor)

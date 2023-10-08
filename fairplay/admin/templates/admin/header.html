@@ -1,61 +1,56 @@
-<nav class="navbar navbar-dark navbar-expand-lg text-bg-primary fixed-top" hx-boost="true" hx-target="main" hx-swap="innerHTML scroll:top">
+<nav class="navbar navbar-expand-lg navbar-dark text-bg-primary fixed-top shadow-lg" hx-boost="true" hx-target="main" hx-swap="innerHTML scroll:top">
   <div class="container">
     <div>
-      <a class="navbar-brand me-2" hx-boost="false" href="/">
-        <i class="fa-solid fa-golf-ball-tee me-2"></i>fair<span class="fw-bold">.play</span>
-      </a>
-      <div class="vr me-2"></div>
-      <a class="navbar-brand" href="{{ url_for('admin.index') }}">
-        <span class="fw-light text-lowercase">Dashboard</span>
-      </a>
+      <i class="fa-solid fa-golf-ball-tee fa-lg me-2"></i>
+      <a class="navbar-brand" href="/" hx-boost="false">fair<span class="fw-bold">.play</span></a>
+      <a class="navbar-brand text-lowercase" href="/admin">Admin</a>
     </div>
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#navbarOffcanvasLg" aria-controls="navbarOffcanvasLg" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="offcanvas offcanvas-end text-bg-primary" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+    <div class="offcanvas text-bg-primary offcanvas-end" tabindex="-1" id="navbarOffcanvasLg" aria-labelledby="navbarOffcanvasLgLabel">
       <div class="offcanvas-header">
-        <h5 class="offcanvas-title text-light" id="offcanvasNavbarLabel"><i class="fa-solid fa-golf-ball-tee me-2"></i>fair<span class="fw-bold">.play</span></h5>
-        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">Menu</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body">
-        <ul class="navbar-nav justify-content-start flex-grow-1 pe-3">
+      <div class="offcanvas-body d-flex flex-column flex-lg-row">
+        <ul class="navbar-nav justify-content-start">
           <li class="nav-item">
-            <a class="nav-link" href="/admin/courses">Courses</a>
+            <a class="nav-link {% if request.blueprint.startswith('admin.courses') %}active" aria-current="page"{% else %}"{% endif %} href="/admin/courses">Courses</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/admin/games">Games</a>
+            <a class="nav-link" {% if request.blueprint.startswith('admin.games') %}active" aria-current="page"{% else %}"{% endif %} href="#">Games</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="/admin/players">Players</a>
+            <a class="nav-link" {% if request.blueprint.startswith('admin.players') %}active" aria-current="page"{% else %}"{% endif %} href="#">Players</a>
           </li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               Configuration
             </a>
             <ul class="dropdown-menu">
-              <li><a class="dropdown-item" href="/admin/audit/events">Auditing Events</a></li>
-              <li><a class="dropdown-item" href="/admin/auth/users">Users</a></li>
-            </ul>
-          </li>
-        </ul>
-        <ul class="navbar-nav justify-content-end flex-grow-1">
-          <li class="nav-item dropdown me-0">
-            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-              <img class="rounded-circle me-1" src="{{ url_for('static', filename='img/profile.svg', _anchor=current_user.name[0]|lower) }}" height="24" width="24">
-              {{ current_user.name }}
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#">Dashboard</a></li>
+              <li><a class="dropdown-item" href="#">Action</a></li>
               <li><a class="dropdown-item" href="#">Another action</a></li>
               <li>
                 <hr class="dropdown-divider">
               </li>
+              <li><a class="dropdown-item" href="#">Something else here</a></li>
+            </ul>
+          </li>
+        </ul>
+        <ul class="navbar-nav justify-content-start justify-content-lg-end mt-auto ms-lg-auto">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              <img class="rounded-circle" width="16" src="{{ url_for('static', filename='img/profile.svg', _anchor=(current_user.name[0] or 'none')|lower) }}">
+              <span class="d-none d-xl-inline-block ms-1">{{ current_user.name }}</span>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-lg-end">
+              <li><a class="dropdown-item" href="#">Admin</a></li>
+              <li><a class="dropdown-item" href="#">My profile</a></li>
               <li>
-                <form action="{{ url_for('auth.logout') }}" hx-boost="false" method="POST">
-                  <button class="dropdown-item" type="submit">Logout</button>
-                  <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
-                </form>
+                <hr class="dropdown-divider">
               </li>
+              <li><a class="dropdown-item" href="#">Logout</a></li>
             </ul>
           </li>
         </ul>

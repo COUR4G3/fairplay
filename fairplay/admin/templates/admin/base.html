@@ -1,20 +1,9 @@
-{% extends htmx_request and 'base-snippet.html' or 'base.html' %}
+{% extends 'base.html' %}
 
 {% block body %}
 {% include 'admin/header.html' %}
 
-<main class="mb-3" style="padding-top:5rem" hx-boost="true" hx-target="this" hx-swap="innerHTML scroll:top">
-  {% block main %}
-  <div class="container">
-    <nav aria-label="breadcrumb">
-      <ol class="breadcrumb rounded-0">
-        <li class="breadcrumb-item"><a href="{{ url_for('admin.index') }}"><i class="fa-solid fa-cog"></i></a></li>
-        {% block breadcrumbs %}
-        {% endblock %}
-        <li class="breadcrumb-item active" aria-current="page">{% block title %}Settings{% endblock %}</li>
-      </ol>
-    </nav>
-  </div>
-  {% endblock %}
+<main hx-boost="true" style="margin-top:5rem;scroll-margin-top:5rem;" hx-target="this" hx-swap="innerHTML scroll:top">
+  {% block main %}{% endblock %}
 </main>
 {% endblock %}

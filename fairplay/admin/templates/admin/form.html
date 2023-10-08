@@ -1,69 +1,34 @@
 {% macro render_form(
   record,
-  actions=[],
-  endpoint_id='id',
-  endpoint_kwargs={},
-  records=None,
-  save=True,
-  save_label='Save'
+  actions=[{'label': 'Delete', 'method': 'DELETE'}],
+  prefix='',
+  base_endpoint='.',
+  update=True,
+  update_endpoint='list',
+  update_label='Save',
+  endpoint_kwargs={}
 ) %}
-<form action="{{ request.url }}" method="POST" class="card mb-3" id="record-form">
-  <div class="card-header">
-    <div class="row g-2">
-      <div class="col-auto">
-        {% if save %}
-        <button class="btn btn-primary me-1" type="submit">{{ save_label }}</button>
-        {% endif %}
-        {% if record %}
-        {% for action in actions|selectattr('button', 'true') %}
-        <button class="btn btn-{{ action.button_classname or 'secondary' }}" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **dict({endpoint_id: record[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='ids[]'],input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
-        {% endfor %}
-        {% endif %}
-      </div>
-      {% if record %}
-      <div class="col-auto ms-auto">
-        <div class="row align-items-center g-2">
-          {% if records %}
-          <div class="col-auto me-2">
-            <span class="text-body-emphasis">{{ records.index(record) + 1 }}</span> of <span class="text-body-emphasis">{{ records|length }}</span> records
-          </div>
-          <div class="col-auto">
-            <nav aria-label="List pagination">
-              <ul class="pagination justify-content-end mb-0">
-                <li class="page-item">
-                  <a class="page-link {% if records.index(record) == 0 %}disabled{% endif %}" href="{% if records.index(record) > 0 %}{{ url_for(request.endpoint, **dict({endpoint_id: records[records.index(record) - 1][endpoint_id]}, **endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Previous">
-                    <span aria-hidden="true"><i class="fa fa-arrow-left"></i></span>
-                  </a>
-                </li>
-                <li class="page-item">
-                  <a class="page-link {% if records.index(record) + 1 == records|length %}disabled{% endif %}" href="{% if records.index(record) + 1 < records|length %}{{ url_for(request.endpoint, **dict({endpoint_id: records[records.index(record) + 1][endpoint_id]}, **endpoint_kwargs)) }}{% else %}#{% endif %}" aria-label="Next">
-                    <span aria-hidden="true"><i class="fa fa-arrow-right"></i></span>
-                  </a>
-                </li>
-              </ul>
-            </nav>
-          </div>
-          {% endif %}
-          <div class="col-auto">
-            <button class="btn btn-link text-reset pe-0" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
-            <ul class="dropdown-menu dropdown-menu-end">
-              {% for action in actions|rejectattr('button', 'true') %}
-              <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method, **dict({endpoint_id: record[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" {% if action.vars %}hx-vars='{{ action.vars|tojson }}'{% endif %} hx-include="input[name='next']" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
-              {% endfor %}
-            </ul>
-          </div>
-        </div>
-      </div>
+
+<form id="{{ prefix }}record-form" class="card mb-3" action="{{ url_for(base_endpoint + update_endpoint, **endpoint_kwargs) }}" method="POST">
+
+  <div class="card-header d-flex justify-content-between align-items-center pe-3">
+    <div class="me-1">
+      {% if update is not false %}
+      <button type="submit" class="btn btn-outline-primary text-nowrap me-1"><i class="fa-solid fa-floppy-disk me-1"></i> {{ update_label or 'Save' }}</button>
+      <button type="reset" class="btn btn-secondary me-1">Discard</button>
       {% endif %}
+
+      {% for action in actions|selectattr('button')|rejectattr('button', 'false')|rejectattr('multi', 'false') %}
+      <button class="btn btn-{% if action.button is true %}outline-primary{% else %}{{ action.button }}{% endif %} me-1 d-none d-mb-block-inline" hx-{{ action.method or 'POST' }}="#" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button>
+      {% endfor %}
+    </div>
+    <div class="d-flex align-items-center ms-auto">
+      
     </div>
   </div>
-  {% if record and record.active is false %}
-  <div class="alert alert-warning">
-    This record has been disabled.
-  </div>
-  {% endif %}
+
   <div class="card-body">
     {{ caller() }}
   </div>
-</form>
+</div>
 {% endmacro %}

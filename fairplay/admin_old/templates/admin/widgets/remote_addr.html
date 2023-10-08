@@ -1,0 +1,9 @@
+{% macro render_remote_addr(remote_addr) %}
+{% if remote_addr %}
+<div class="text-nowrap">
+  {{ get_country_code(remote_addr, 'UN')|flag }} {{ remote_addr }}
+</div>
+{% else %}
+<span class="text-muted">None</span>
+{% endif %}
+{% endmacro %}

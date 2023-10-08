@@ -1,0 +1,9 @@
+{
+  "id": "fairplay",
+  "start_url": "/",
+  "background_color": "#2fb380",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#2fb380",
+  "description": ""
+}

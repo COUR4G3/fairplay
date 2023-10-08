@@ -1,25 +1,26 @@
 {% extends 'admin/base.html' %}
 
 {% from 'admin/list.html' import render_list %}
-{% from 'admin/widgets/date.html' import render_date %}
 
 {% block title %}Courses{% endblock %}
 
 {% block main %}
-{{ super() }}
 <div class="container">
+  <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '/';">
+    <ol class="breadcrumb border rounded-0 shadow-sm">
+      <li class="breadcrumb-item"><a href="/admin" title="Dashboard"><i class="fa-solid fa-cog fa-fw"></i></a></li>
+      <li class="breadcrumb-item active" aria-current="page">Courses</li>
+    </ol>
+  </nav>
+
   {{
     render_list(
       courses,
-      actions=[
-        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these courses? This operation is irreversible.'},
-      ],
       columns=[
+        {'name': 'name', 'label': 'Name'},
         {'name': 'hole_count', 'label': 'Holes'},
       ],
-      title='name',
-      title_label='Name',
-    ) 
+    )
   }}
 </div>
 {% endblock %}
