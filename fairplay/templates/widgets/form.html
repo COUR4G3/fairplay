@@ -7,8 +7,11 @@
 {% macro render_coordinates(field, initial_zoom=14) %}
 {{ render_label(field) }}
 <div class="row" >
-  <div class="col-12 mb-3">
+  <div class="col-12 mb-2">
     <div class="map" data-initial-zoom="{{ initial_zoom }}" data-latitude="#{{ field.x.id }}" data-longitude="#{{ field.y.id }}" data-draggable="true"></div>
+  </div>
+  <div class="col-12 mb-2">
+    <div class="form-text">Drag the marker or double-click to place the marker.</div>
   </div>
   <div class="col">
     <input

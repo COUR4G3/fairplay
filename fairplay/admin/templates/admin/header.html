@@ -34,7 +34,9 @@
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="#">Something else here</a></li>
+              <li><h6 class="dropdown-header">Security</h6></li>
+              <li><a class="dropdown-item" href="/admin/auth/audit-events">Auditing Events</a></li>
+              <li><a class="dropdown-item" href="/admin/auth/users">Users</a></li>
             </ul>
           </li>
         </ul>
@@ -42,7 +44,7 @@
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               <img class="rounded-circle" width="16" src="{{ url_for('static', filename='img/profile.svg', _anchor=(current_user.name[0] or 'none')|lower) }}">
-              <span class="d-none d-xl-inline-block ms-1">{{ current_user.name }}</span>
+              <span class="d-inline-block d-lg-none d-xl-inline-block ms-1">{{ current_user.name }}</span>
             </a>
             <ul class="dropdown-menu dropdown-menu-lg-end">
               <li><a class="dropdown-item" href="#">Admin</a></li>
@@ -50,7 +52,12 @@
               <li>
                 <hr class="dropdown-divider">
               </li>
-              <li><a class="dropdown-item" href="#">Logout</a></li>
+              <li>
+                <form action="{{ url_for('auth.logout') }}" hx-boost="false" method="POST">
+                  <input name="csrf_token" type="hidden" value="{{ csrf_token() }}">
+                  <button class="dropdown-item" type="submit">Logout</button>
+                </form>
+              </li>
             </ul>
           </li>
         </ul>

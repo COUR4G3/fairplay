@@ -1,0 +1,17 @@
+scripts:
+  filters: rjsmin
+  output: dist/js/index.js
+  depends: src/**/*.js
+  contents:
+    - src/js/index.js
+scripts-map:
+  filters: rjsmin
+  output: dist/js/map.js
+  contents:
+    - src/js/map.js
+styles:
+  filters: scss,postcss,rcssmin
+  output: dist/css/index.css
+  depends: src/**/*.scss
+  contents:
+    - src/scss/index.scss

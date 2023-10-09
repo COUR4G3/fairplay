@@ -1,7 +1,7 @@
 {% macro render_list(
   records,
   columns=[],
-  actions=[{'label': 'Delete', 'method': 'DELETE'}],
+  actions=[{'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE'}],
   controls={'search': True},
   filters=[],
   pagination={},
@@ -46,7 +46,24 @@
     {{ render_header(columns, options=header) }}
     <tbody>
       {% for record in records %}
-      {{ render_record(record, actions, columns) }}
+      <tr>
+        <th scope="row" class="w-0"><input id="{{ prefix }}select-{{ id }}" class="form-check table-select mb-0" type="checkbox" name="{{ prefix }}ids" value="{{ id }}" aria-label="Select {{ id }}"></th>
+        {% for column in columns %}
+        <td class="table-clickable text-{{ column.align or 'start' }}" hx-get="{{ url_for(base_endpoint + read_endpoint, id=record.id, **endpoint_kwargs) }}" hx-replace-url="true">
+          {{ column.render and column.render(record[column.name]) or record[column.name] }}
+        </td>
+        {% endfor %}
+        <th scope="row" class="w-0">
+          {% if actions %}
+          <button class="btn btn-link icon-link text-reset px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            {% for action in actions|rejectattr('multi', 'true') %}
+            <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, id=record.id, _method=action.method) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
+            {% endfor %}
+          </ul>
+          {% endif %}
+        </th>
+      </tr>
       {% else %}
       <tr>
         <td class="text-center pt-5 pb-3" colspan="99">
@@ -115,9 +132,7 @@
 {% macro render_header(columns, options={}) %}
 <thead>
   <th style="width:0">
-    {% if records %}
     <input id="{{ prefix }}select-all" class="form-check table-select-all mb-0" type="checkbox" name="{{ prefix }}ids" value="all" aria-label="Select all">
-    {% endif %}
   </th>
   {% for column in columns %}
   <th>
@@ -163,25 +178,4 @@
   </div>
 </div>
 {% endif %}
-{% endmacro %}
-
-{% macro render_record(record, actions, columns) %}
-<tr>
-  <th scope="row" style="width:0"><input id="{{ prefix }}select-{{ id }}" class="form-check table-select mb-0" type="checkbox" name="{{ prefix }}ids" value="{{ id }}" aria-label="Select {{ id }}"></th>
-  {% for column in columns %}
-  <td class="text-{{ column.align or 'start' }}">
-    {{ column.render and column.render(record) or record[column.name] }}
-  </td>
-  {% endfor %}
-  <th scope="row" style="width:0">
-    {% if actions %}
-    <button class="btn btn-link icon-link text-reset px-2" type="button" data-bs-toggle="dropdown" type="button" aria-expanded="false"><i class="fa fa-ellipsis-vertical fa-fw"></i></button>
-    <ul class="dropdown-menu dropdown-menu-end">
-      {% for action in actions|rejectattr('multi', true) %}
-      <li><button class="dropdown-item" hx-{{ action.method or 'POST' }}="{{ url_for(action.endpoint, _method=action.method,  **dict({endpoint_id: item[endpoint_id]}, **dict(endpoint_kwargs, **action.endpoint_kwargs or {}))) }}" hx-params="" {% if action.confirm %}hx-confirm="{{ action.confirm }}"{% endif %} type="button">{{ action.label }}</button></li>
-      {% endfor %}
-    </ul>
-    {% endif %}
-  </th>
-</tr>
 {% endmacro %}

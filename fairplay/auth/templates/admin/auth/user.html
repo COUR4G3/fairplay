@@ -7,14 +7,16 @@
 {% if user %}{{ user.name }}{% else %}New{% endif %}
 {% endblock %}
 
-{% block breadcrumbs %}
-{{ super() }}
-<li class="breadcrumb-item"><a href="{{ url_for('.list') }}">Users</a></li>
-{% endblock %}
-
 {% block main %}
-{{ super() }}
 <div class="container">
+  <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '/';">
+    <ol class="breadcrumb border rounded-0 shadow-sm">
+      <li class="breadcrumb-item"><a href="/admin" title="Dashboard"><i class="fa-solid fa-cog fa-fw"></i></a></li>
+      <li class="breadcrumb-item"><a href="/admin/auth/users">Users</a></li>
+      <li class="breadcrumb-item active" aria-current="page">{% if user %}{{ user.name }}{% else %}New{% endif %}</li>
+    </ol>
+  </nav>
+
   {% call
     render_form(
       user,
@@ -55,13 +57,6 @@
     <div class="col-12 col-md-3 col-xxl-2 order-first order-md-last">
       <img class="img-fluid img-thumbnail rounded-circle" src="{% if user %}{{ user.photo_url }}{% else %}{{ url_for('static', filename='img/profile.svg', _anchor='none') }}{% endif %}">
     </div>
-  </div>
   {% endcall %}
-
-  {% if user %}
-  <h2 class="my-3">Auditing Events</h2>
-
-  {% include 'admin/auth/audit-list.html' %}
-  {% endif %}
 </div>
 {% endblock %}

@@ -1,4 +1,6 @@
-{% extends 'base.html' %}
+{% extends htmx_request and 'base-snippet.html' or 'base.html' %}
+
+{% block title %}Admin{% endblock %}
 
 {% block body %}
 {% include 'admin/header.html' %}

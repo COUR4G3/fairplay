@@ -6,9 +6,15 @@
 {% block title %}Users{% endblock %}
 
 {% block main %}
-{{ super() }}
 <div class="container">
-  {{ 
+  <nav aria-label="breadcrumb" style="--bs-breadcrumb-divider: '/';">
+    <ol class="breadcrumb border rounded-0 shadow-sm">
+      <li class="breadcrumb-item"><a href="/admin" title="Dashboard"><i class="fa-solid fa-cog fa-fw"></i></a></li>
+      <li class="breadcrumb-item active" aria-current="page">Users</li>
+    </ol>
+  </nav>
+
+  {{
     render_list(
       users,
       actions=[
@@ -17,22 +23,16 @@
         {'endpoint': '.enable', 'label': 'Enable', 'method': 'POST'},
       ],
       columns=[
+        {'name': 'name', 'label': 'Name'},
         {'name': 'email', 'label': 'Email address'},
         {'name': 'created_date', 'label': 'Created', 'render': render_relative_date},
         {'name': 'last_login_date', 'label': 'Last Login', 'render': render_relative_date},
       ],
-      filters={
-        'role': [
-          {'label': 'All', 'value': ''},
-          {'label': 'Administrators', 'value': 'admin'},
-          {'label': 'Users', 'value': 'user'},
-        ],
-        'active': [{'label': 'Inactive', 'value': 'false'}],
-      },
-      photo='photo_url',
-      title='name',
-      title_label='Name'
-    ) 
+      filters=[
+        {'name': 'role', 'values': [('', 'All'), ('admin', 'Administrators'), ('user', 'Users')]},
+        {'name': 'active', 'label': 'Archived', 'value': 'false'}
+      ],
+    )
   }}
- </div>
+</div>
 {% endblock %}

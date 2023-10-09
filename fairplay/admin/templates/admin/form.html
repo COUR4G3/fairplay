@@ -3,19 +3,26 @@
   actions=[{'label': 'Delete', 'method': 'DELETE'}],
   prefix='',
   base_endpoint='.',
-  update=True,
-  update_endpoint='list',
+  create_endpoint='create',
+  list_endpoint='list',
+  update_endpoint='update',
   update_label='Save',
   endpoint_kwargs={}
 ) %}
 
-<form id="{{ prefix }}record-form" class="card mb-3" action="{{ url_for(base_endpoint + update_endpoint, **endpoint_kwargs) }}" method="POST">
+{% if record %}
+<form id="{{ prefix }}record-form" class="card mb-3" action="{{ url_for(base_endpoint + update_endpoint, id=record.id, **endpoint_kwargs) }}" method="POST">
+{% else %}
+<form id="{{ prefix }}record-form" class="card mb-3" action="{{ url_for(base_endpoint + create_endpoint, **endpoint_kwargs) }}" method="POST">
+{% endif %}
 
   <div class="card-header d-flex justify-content-between align-items-center pe-3">
     <div class="me-1">
-      {% if update is not false %}
       <button type="submit" class="btn btn-outline-primary text-nowrap me-1"><i class="fa-solid fa-floppy-disk me-1"></i> {{ update_label or 'Save' }}</button>
-      <button type="reset" class="btn btn-secondary me-1">Discard</button>
+      {% if record %}
+      <button type="reset" class="btn btn-outline-danger me-1">Discard</button>
+      {% else %}
+      <a href="{{ url_for(base_endpoint + list_endpoint, **endpoint_kwargs) }}" class="btn btn-outline-danger me-1">Discard</a>
       {% endif %}
 
       {% for action in actions|selectattr('button')|rejectattr('button', 'false')|rejectattr('multi', 'false') %}

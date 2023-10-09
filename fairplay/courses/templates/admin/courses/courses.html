@@ -16,9 +16,12 @@
   {{
     render_list(
       courses,
+      actions=[
+        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete these course(s)? This operation is irreversible.'},
+      ],
       columns=[
         {'name': 'name', 'label': 'Name'},
-        {'name': 'hole_count', 'label': 'Holes'},
+        {'align': 'end', 'name': 'hole_count', 'label': 'Holes'},
       ],
     )
   }}

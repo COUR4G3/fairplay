@@ -72,6 +72,14 @@ body {
   @include box-shadow($input-box-shadow);
 }
 
+.table-clickable {
+  cursor: pointer;
+}
+
+.w-0 {
+  width: 0;
+}
+
 .link-facebook {
   color: var(--brand-facebook);
 

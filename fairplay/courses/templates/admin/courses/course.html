@@ -20,10 +20,23 @@
 
   {% call
     render_form(
-      course
+      course,
+      actions=[
+        {'endpoint': '.delete', 'label': 'Delete', 'method': 'DELETE', 'confirm': 'Are you sure you want to delete this course? This operation is irreversible.'},
+      ],
     ) 
   %}
-
+  <div class="row" style="max-width:768px;">
+    <div class="col-md-8 mb-3">
+      {{ form_widgets.render_field(form.name) }}
+    </div>
+    <div class="col-12 h-100 mb-3">
+      {{ form_widgets.render_textarea(form.description, editor=True) }}
+    </div>
+    <div class="col-12 mb-3">
+      {{ form_widgets.render_coordinates(form.pos) }}
+    </div>
+  </div>
   {% endcall %}
 </div>
 {% endblock %}

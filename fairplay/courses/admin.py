@@ -128,6 +128,12 @@ def list():
             )
         )
 
+    order = request.args.get("order")
+    if order and order[0] == "-":
+        courses = courses.order_by(getattr(Course, order[1:]).desc())
+    elif order:
+        courses = courses.order_by(order)
+
     courses = apply_paged_pagination(courses)
 
     return render_template("admin/courses/courses.html", courses=courses)
@@ -364,8 +370,6 @@ def delete_feature(course_id, number, id=None):
 def list_features(course_id, number):
     hole = get_hole(course_id, number)
     features = CourseFeature.query.filter(CourseFeature.hole == hole)
-
-    q = request.args.get("q")
 
     features = apply_paged_pagination(features)
 
