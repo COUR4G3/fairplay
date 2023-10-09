@@ -62,10 +62,14 @@
 {% macro render_field(field, placeholder=None) %}
 {% if field.type == 'BooleanField' %}
 {{ render_checkbox(field) }}
-{% elif field.type == 'TextAreaField' %}
-{{ render_textarea(field, placeholder=placeholder) }}
 {% elif field.type == 'FileField' %}
 {{ render_input(field, type='file', placeholder=placeholder) }}
+{% elif field.type == 'FloatField' %}
+{{ render_input(field, type='number', placeholder=placeholder) }}
+{% elif field.type == 'InputField' %}
+{{ render_input(field, type='number', placeholder=placeholder) }}
+{% elif field.type == 'TextAreaField' %}
+{{ render_textarea(field, placeholder=placeholder) }}
 {% else %}
 {{ render_input(field, placeholder=placeholder) }}
 {% endif %}
